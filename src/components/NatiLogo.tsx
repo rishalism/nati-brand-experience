@@ -1,5 +1,5 @@
 import React from 'react';
-import natilogo from '../assets/Nati.png'
+import natilogo from '../assets/Logo.png'
 
 interface NatiLogoProps {
   className?: string;
