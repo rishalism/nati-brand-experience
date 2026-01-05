@@ -1,5 +1,6 @@
 import React from 'react';
 import natilogo from '../assets/Nati.png'
+
 interface NatiLogoProps {
   className?: string;
   size?: 'sm' | 'md' | 'lg';
