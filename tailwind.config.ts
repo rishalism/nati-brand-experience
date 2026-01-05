@@ -68,7 +68,7 @@ export default {
         },
       },
       fontFamily: {
-        heading: ["Archivo", "sans-serif"],
+        heading: ["Bebas Neue", "sans-serif"],
         body: ["Inter", "sans-serif"],
       },
       borderRadius: {
