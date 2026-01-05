@@ -1,11 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
+import { Menu, X, ShoppingBag } from 'lucide-react';
 import NatiLogo from './NatiLogo';
 import { Button } from './ui/button';
 
-const Header: React.FC = () => {
+interface HeaderProps {
+  cartCount?: number;
+  onCartClick?: () => void;
+}
+
+const Header: React.FC<HeaderProps> = ({ cartCount, onCartClick }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
+  const isShopPage = location.pathname === '/shop';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -50,11 +58,27 @@ const Header: React.FC = () => {
             ))}
           </nav>
 
-          {/* CTA Button */}
-          <div className="hidden md:block">
-            <Button variant="hero" size="default">
-              Shop Now
-            </Button>
+          {/* CTA Button / Cart */}
+          <div className="hidden md:flex items-center gap-4">
+            {isShopPage && onCartClick ? (
+              <button
+                onClick={onCartClick}
+                className="relative p-2 text-foreground hover:text-primary transition-colors"
+              >
+                <ShoppingBag size={24} />
+                {cartCount !== undefined && cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs w-5 h-5 rounded-full flex items-center justify-center font-heading">
+                    {cartCount}
+                  </span>
+                )}
+              </button>
+            ) : (
+              <Link to="/login">
+                <Button variant="hero" size="default">
+                  Shop Now
+                </Button>
+              </Link>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -84,9 +108,24 @@ const Header: React.FC = () => {
                 {link.label}
               </a>
             ))}
-            <Button variant="hero" size="lg" className="mt-4 w-full">
-              Shop Now
-            </Button>
+            {isShopPage && onCartClick ? (
+              <button
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  onCartClick();
+                }}
+                className="flex items-center gap-2 text-foreground hover:text-primary transition-colors py-2"
+              >
+                <ShoppingBag size={20} />
+                Cart {cartCount !== undefined && cartCount > 0 && `(${cartCount})`}
+              </button>
+            ) : (
+              <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
+                <Button variant="hero" size="lg" className="mt-4 w-full">
+                  Shop Now
+                </Button>
+              </Link>
+            )}
           </nav>
         </div>
       </div>
