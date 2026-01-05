@@ -34,7 +34,7 @@ const Header: React.FC = () => {
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
           <a href="#" className="flex-shrink-0">
-            <NatiLogo size="sm" />
+            <NatiLogo size="lg" />
           </a>
 
           {/* Desktop Navigation */}

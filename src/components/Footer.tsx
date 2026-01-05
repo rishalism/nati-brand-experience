@@ -36,7 +36,7 @@ const Footer: React.FC = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
           {/* Brand column */}
           <div className="col-span-2 md:col-span-1">
-            <NatiLogo size="md" className="mb-6" />
+            <NatiLogo size="lg" className="mb-6" />
             <p className="text-foreground/50 text-sm leading-relaxed mb-6 max-w-xs">
               Premium electrolyte hydration, crafted for performance and loved by everyone.
             </p>
