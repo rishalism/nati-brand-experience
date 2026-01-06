@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, ShoppingBag } from 'lucide-react';
 import NatiLogo from './NatiLogo';
+import ThemeToggle from './ThemeToggle';
 import { Button } from './ui/button';
 
 interface HeaderProps {
@@ -59,8 +60,9 @@ const Header: React.FC<HeaderProps> = ({ cartCount, onCartClick }) => {
             ))}
           </nav>
 
-          {/* CTA Button / Cart */}
+          {/* CTA Button / Cart / Theme Toggle */}
           <div className="hidden md:flex items-center gap-4">
+            <ThemeToggle />
             {isShopPage && onCartClick ? (
               <button
                 onClick={onCartClick}
@@ -82,14 +84,17 @@ const Header: React.FC<HeaderProps> = ({ cartCount, onCartClick }) => {
             )}
           </div>
 
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden p-2 text-foreground"
-            aria-label="Toggle menu"
-          >
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+          {/* Mobile Menu Button + Theme Toggle */}
+          <div className="flex md:hidden items-center gap-2">
+            <ThemeToggle />
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="p-2 text-foreground"
+              aria-label="Toggle menu"
+            >
+              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
         </div>
 
         {/* Mobile Menu */}
