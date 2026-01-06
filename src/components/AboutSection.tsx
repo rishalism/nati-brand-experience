@@ -43,8 +43,8 @@ const AboutSection: React.FC = () => {
 
           {/* Main heading */}
           <h2 className="fade-up text-3xl sm:text-4xl md:text-5xl font-heading font-bold text-foreground mb-8 leading-tight">
-            Born from a passion for{' '}
-            <span className="text-primary">optimal hydration</span>
+            BORN FROM A PASSION FOR{' '}
+            <span className="text-primary">OPTIMAL HYDRATION</span>
           </h2>
 
           {/* Story text */}
