@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { Button } from './ui/button';
-import { ArrowDown } from 'lucide-react';
+import { ArrowDown, ArrowRight } from 'lucide-react';
 import heroProduct from '@/assets/hero-product.jpg';
+import { Link } from 'react-router-dom';
 
 const HeroSection: React.FC = () => {
   const heroRef = useRef<HTMLDivElement>(null);
@@ -29,98 +30,98 @@ const HeroSection: React.FC = () => {
   return (
     <section 
       ref={heroRef}
-      className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16"
+      className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20"
     >
-      {/* Background gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-background/95" />
+      {/* Ambient background effects */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-background" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent" />
       
-      {/* Subtle pattern overlay */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `repeating-linear-gradient(
-            45deg,
-            transparent,
-            transparent 50px,
-            hsl(var(--primary)) 50px,
-            hsl(var(--primary)) 51px
-          )`
-        }} />
-      </div>
+      {/* Subtle grid pattern */}
+      <div className="absolute inset-0 opacity-[0.02]" style={{
+        backgroundImage: `linear-gradient(hsl(var(--foreground)) 1px, transparent 1px),
+                          linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)`,
+        backgroundSize: '60px 60px'
+      }} />
 
-      <div className="container relative z-10 px-4 md:px-6 py-12 md:py-20">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+      <div className="container relative z-10 px-6 md:px-8 py-16 md:py-24">
+        <div className="grid lg:grid-cols-2 gap-16 lg:gap-20 items-center">
           {/* Text Content */}
           <div className="text-center lg:text-left order-2 lg:order-1">
-            <div className="fade-up space-y-6">
+            <div className="fade-up space-y-8">
               {/* Tagline */}
-              <p className="text-primary font-heading font-semibold text-sm md:text-base uppercase tracking-[0.3em]">
+              <p className="premium-label">
                 Premium Electrolyte Mix
               </p>
               
               {/* Main Headline */}
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-heading font-black uppercase leading-[0.9] tracking-tight">
+              <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-display font-bold leading-[0.95] tracking-tight">
                 <span className="text-foreground">Rehydrate</span>
                 <br />
-                <span className="text-primary">Right</span>
+                <span className="text-gradient-lime">Right</span>
               </h1>
               
               {/* Description */}
-              <p className="text-foreground/60 text-base md:text-lg max-w-md mx-auto lg:mx-0 leading-relaxed">
+              <p className="text-muted-foreground text-lg md:text-xl max-w-lg mx-auto lg:mx-0 leading-relaxed font-light">
                 Expertly formulated with 6 essential electrolytes. 
                 Designed for athletes, loved by everyone.
               </p>
               
               {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4">
-                <Button variant="hero" size="xl">
-                  Shop Now
-                </Button>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-2">
+                <Link to="/login">
+                  <Button variant="hero" size="xl" className="group btn-glow">
+                    Shop Now
+                    <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
+                  </Button>
+                </Link>
                 <Button variant="hero-outline" size="xl">
                   Learn More
                 </Button>
               </div>
 
               {/* Stats */}
-              <div className="flex items-center justify-center lg:justify-start gap-8 pt-8">
-                <div className="text-center">
-                  <p className="text-2xl md:text-3xl font-heading font-bold text-primary">6</p>
-                  <p className="text-xs text-foreground/50 uppercase tracking-wider">Electrolytes</p>
-                </div>
-                <div className="w-px h-12 bg-border" />
-                <div className="text-center">
-                  <p className="text-2xl md:text-3xl font-heading font-bold text-primary">0</p>
-                  <p className="text-xs text-foreground/50 uppercase tracking-wider">Added Sugar</p>
-                </div>
-                <div className="w-px h-12 bg-border" />
-                <div className="text-center">
-                  <p className="text-2xl md:text-3xl font-heading font-bold text-primary">100%</p>
-                  <p className="text-xs text-foreground/50 uppercase tracking-wider">Natural</p>
-                </div>
+              <div className="flex items-center justify-center lg:justify-start gap-10 pt-10">
+                {[
+                  { value: '6', label: 'Electrolytes' },
+                  { value: '0', label: 'Added Sugar' },
+                  { value: '100%', label: 'Natural' },
+                ].map((stat, i) => (
+                  <React.Fragment key={stat.label}>
+                    {i > 0 && <div className="w-px h-14 bg-border/50" />}
+                    <div className="text-center">
+                      <p className="text-3xl md:text-4xl font-display font-bold text-primary mb-1">
+                        {stat.value}
+                      </p>
+                      <p className="text-xs text-muted-foreground uppercase tracking-widest">
+                        {stat.label}
+                      </p>
+                    </div>
+                  </React.Fragment>
+                ))}
               </div>
             </div>
           </div>
 
           {/* Product Image */}
-          <div className="fade-up order-1 lg:order-2 flex justify-center">
+          <div className="fade-up order-1 lg:order-2 flex justify-center" style={{ transitionDelay: '200ms' }}>
             <div className="relative">
-              {/* Glow effect */}
-              <div className="absolute inset-0 blur-3xl bg-primary/20 rounded-full scale-75" />
+              {/* Ambient glow */}
+              <div className="absolute inset-0 blur-[80px] bg-primary/20 rounded-full scale-90 animate-glow-pulse" />
               
               {/* Product image */}
               <img
                 src={heroProduct}
                 alt="NATI Electrolyte Powder Pouches"
-                className="relative z-10 w-full max-w-sm md:max-w-md lg:max-w-lg rounded-2xl animate-float"
-                style={{ animationDuration: '4s' }}
+                className="relative z-10 w-full max-w-sm md:max-w-md lg:max-w-lg rounded-3xl animate-float-slow"
               />
             </div>
           </div>
         </div>
 
         {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 hidden md:flex flex-col items-center gap-2 animate-pulse">
-          <span className="text-xs text-foreground/40 uppercase tracking-wider">Scroll</span>
-          <ArrowDown className="w-5 h-5 text-foreground/40" />
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 hidden md:flex flex-col items-center gap-3">
+          <span className="text-xs text-muted-foreground uppercase tracking-[0.2em] font-medium">Discover</span>
+          <div className="w-px h-12 bg-gradient-to-b from-muted-foreground/50 to-transparent" />
         </div>
       </div>
     </section>
