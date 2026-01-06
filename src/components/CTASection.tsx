@@ -1,6 +1,14 @@
 import React, { useEffect, useRef } from 'react';
 import { Button } from './ui/button';
 import { ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
+
+const stats = [
+  { value: '1000+', label: 'Happy Customers' },
+  { value: '4.9★', label: 'Average Rating' },
+  { value: 'Lab', label: 'Tested Quality' },
+  { value: 'Fast', label: 'Shipping' },
+];
 
 const CTASection: React.FC = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -28,61 +36,55 @@ const CTASection: React.FC = () => {
   return (
     <section 
       ref={sectionRef}
-      className="py-20 md:py-32 relative overflow-hidden"
+      className="section-padding relative overflow-hidden"
     >
-      {/* Background accent */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-primary/5 to-background" />
+      {/* Ambient background */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/8 via-transparent to-transparent" />
       
-      {/* Decorative elements */}
-      <div className="absolute top-1/2 left-0 -translate-y-1/2 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-      <div className="absolute top-1/2 right-0 -translate-y-1/2 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+      {/* Decorative blurs */}
+      <div className="absolute top-1/2 left-0 -translate-y-1/2 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px]" />
+      <div className="absolute top-1/2 right-0 -translate-y-1/2 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px]" />
 
-      <div className="container relative z-10 px-4 md:px-6">
+      <div className="container relative z-10 px-6 md:px-8">
         <div className="max-w-3xl mx-auto text-center">
           {/* Main content */}
-          <div className="fade-up">
-            <span className="text-primary text-xs font-semibold uppercase tracking-[0.3em] mb-6 block">
-              Start Your Journey
-            </span>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-heading font-black text-foreground mb-6 leading-tight">
-              Ready to{' '}
-              <span className="text-primary">Rehydrate Right</span>?
-            </h2>
-            <p className="text-foreground/60 text-base md:text-lg mb-10 max-w-xl mx-auto leading-relaxed">
-              Join thousands who trust NATI for their hydration needs. 
-              Experience the difference quality electrolytes make in your performance and daily life.
-            </p>
+          <p className="fade-up premium-label">Start Your Journey</p>
+          
+          <h2 className="fade-up text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-display font-bold text-foreground mb-8 leading-[1.05]">
+            Ready to{' '}
+            <span className="text-gradient-lime">Rehydrate Right</span>?
+          </h2>
+          
+          <p className="fade-up text-muted-foreground text-lg md:text-xl mb-12 max-w-xl mx-auto leading-relaxed font-light" style={{ transitionDelay: '100ms' }}>
+            Join thousands who trust NATI for their hydration needs. 
+            Experience the difference quality electrolytes make.
+          </p>
 
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button variant="hero" size="xl" className="group">
+          {/* CTA Buttons */}
+          <div className="fade-up flex flex-col sm:flex-row gap-4 justify-center" style={{ transitionDelay: '150ms' }}>
+            <Link to="/login">
+              <Button variant="hero" size="xl" className="group btn-glow">
                 Shop Now
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
               </Button>
-              <Button variant="hero-outline" size="xl">
-                Contact Us
-              </Button>
-            </div>
+            </Link>
+            <Button variant="hero-outline" size="xl">
+              Contact Us
+            </Button>
           </div>
 
           {/* Trust indicators */}
-          <div className="fade-up mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
-            <div className="text-center">
-              <p className="text-2xl md:text-3xl font-heading font-bold text-primary mb-1">1000+</p>
-              <p className="text-xs text-foreground/50 uppercase tracking-wider">Happy Customers</p>
-            </div>
-            <div className="text-center">
-              <p className="text-2xl md:text-3xl font-heading font-bold text-primary mb-1">4.9★</p>
-              <p className="text-xs text-foreground/50 uppercase tracking-wider">Average Rating</p>
-            </div>
-            <div className="text-center">
-              <p className="text-2xl md:text-3xl font-heading font-bold text-primary mb-1">Lab</p>
-              <p className="text-xs text-foreground/50 uppercase tracking-wider">Tested Quality</p>
-            </div>
-            <div className="text-center">
-              <p className="text-2xl md:text-3xl font-heading font-bold text-primary mb-1">Fast</p>
-              <p className="text-xs text-foreground/50 uppercase tracking-wider">Shipping</p>
-            </div>
+          <div className="fade-up mt-20 grid grid-cols-2 md:grid-cols-4 gap-8" style={{ transitionDelay: '200ms' }}>
+            {stats.map((stat, index) => (
+              <div key={stat.label} className="text-center">
+                <p className="text-3xl md:text-4xl font-display font-bold text-primary mb-2">
+                  {stat.value}
+                </p>
+                <p className="text-xs text-muted-foreground uppercase tracking-widest">
+                  {stat.label}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </div>

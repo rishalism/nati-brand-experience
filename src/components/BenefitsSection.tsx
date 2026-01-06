@@ -51,37 +51,33 @@ const BenefitsSection: React.FC = () => {
     <section 
       id="benefits" 
       ref={sectionRef}
-      className="py-20 md:py-32 bg-card/30 relative"
+      className="section-padding bg-card/30 relative"
     >
-      {/* Decorative elements */}
-      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-      <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+      {/* Section dividers */}
+      <div className="section-divider absolute top-0 left-0" />
+      <div className="section-divider absolute bottom-0 left-0" />
 
-      <div className="container px-4 md:px-6">
+      <div className="container px-6 md:px-8">
         {/* Section header */}
-        <div className="text-center max-w-2xl mx-auto mb-16">
-          <div className="fade-up mb-6">
-            <span className="text-primary text-xs font-semibold uppercase tracking-[0.3em]">
-              Why Choose NATI
-            </span>
-          </div>
-          <h2 className="fade-up text-3xl sm:text-4xl md:text-5xl font-heading font-bold text-foreground leading-tight">
+        <div className="text-center max-w-2xl mx-auto mb-20">
+          <p className="fade-up premium-label">Why Choose NATI</p>
+          <h2 className="fade-up text-4xl sm:text-5xl md:text-6xl font-display font-bold text-foreground leading-[1.1]">
             Hydration that{' '}
-            <span className="text-primary">performs</span>
+            <span className="text-gradient-lime">performs</span>
           </h2>
         </div>
 
         {/* Benefits grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
           {benefits.map((benefit, index) => (
             <div
               key={benefit.title}
-              className="fade-up group"
+              className="fade-up"
               style={{ transitionDelay: `${index * 100}ms` }}
             >
-              <div className="h-full p-6 md:p-8 rounded-2xl bg-background border border-border/50 hover:border-primary/30 transition-all duration-300 hover:-translate-y-1">
+              <div className="glass-card-hover h-full p-8">
                 {/* Icon */}
-                <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-300">
+                <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mb-6 transition-all duration-300 group-hover:scale-110">
                   <benefit.icon className="w-7 h-7 text-primary" />
                 </div>
 
@@ -89,7 +85,7 @@ const BenefitsSection: React.FC = () => {
                 <h3 className="font-heading font-semibold text-lg text-foreground mb-3">
                   {benefit.title}
                 </h3>
-                <p className="text-foreground/60 text-sm leading-relaxed">
+                <p className="text-muted-foreground text-sm leading-relaxed">
                   {benefit.description}
                 </p>
               </div>
@@ -98,12 +94,10 @@ const BenefitsSection: React.FC = () => {
         </div>
 
         {/* Bottom highlight */}
-        <div className="fade-up mt-16 text-center">
-          <p className="text-foreground/50 text-sm max-w-xl mx-auto">
-            We prioritize Recommended Dietary Allowances (RDA) in our formulations, 
-            ensuring products that cater to diverse hydration needs.
-          </p>
-        </div>
+        <p className="fade-up mt-20 text-center text-muted-foreground text-sm max-w-xl mx-auto" style={{ transitionDelay: '400ms' }}>
+          We prioritize Recommended Dietary Allowances (RDA) in our formulations, 
+          ensuring products that cater to diverse hydration needs.
+        </p>
       </div>
     </section>
   );
