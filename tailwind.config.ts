@@ -68,7 +68,7 @@ export default {
         },
       },
       fontFamily: {
-        heading: ["Bebas Neue", "sans-serif"],
+        heading: ["Oswald", "Sekuya", "sans-serif"],
         body: ["Inter", "sans-serif"],
       },
       borderRadius: {

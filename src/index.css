@@ -9,16 +9,25 @@
    - Alto (#dbdbdb): Secondary backgrounds, supporting text
 */
 
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&display=swap');
+/* Sekuya-style font - using Oswald as similar alternative */
+@font-face {
+  font-family: 'Sekuya';
+  src: local('Oswald');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
 
 @layer base {
+  /* Dark Theme (Default) */
   :root {
     /* Primary brand colors */
     --nati-lime: 72 94% 46%;
     --nati-dark: 0 0% 11%;
     --nati-light: 0 0% 86%;
     
-    /* Semantic tokens */
+    /* Semantic tokens - Dark Theme */
     --background: 0 0% 11%;
     --foreground: 0 0% 86%;
 
@@ -59,10 +68,10 @@
     --shadow-elevated: 0 20px 60px hsl(0 0% 0% / 0.4);
 
     /* Typography */
-    --font-heading: 'Bebas Neue', sans-serif;
+    --font-heading: 'Oswald', 'Sekuya', sans-serif;
     --font-body: 'Inter', sans-serif;
 
-    /* Sidebar tokens (keeping defaults) */
+    /* Sidebar tokens */
     --sidebar-background: 0 0% 11%;
     --sidebar-foreground: 0 0% 86%;
     --sidebar-primary: 72 94% 46%;
@@ -71,6 +80,56 @@
     --sidebar-accent-foreground: 0 0% 86%;
     --sidebar-border: 0 0% 20%;
     --sidebar-ring: 72 94% 46%;
+  }
+
+  /* Light Theme */
+  .light {
+    /* Semantic tokens - Light Theme */
+    --background: 0 0% 98%;
+    --foreground: 0 0% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 11%;
+
+    --primary: 72 94% 40%;
+    --primary-foreground: 0 0% 11%;
+
+    --secondary: 0 0% 94%;
+    --secondary-foreground: 0 0% 20%;
+
+    --muted: 0 0% 90%;
+    --muted-foreground: 0 0% 45%;
+
+    --accent: 72 94% 40%;
+    --accent-foreground: 0 0% 11%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 85%;
+    --input: 0 0% 85%;
+    --ring: 72 94% 40%;
+
+    /* Custom design tokens - Light */
+    --gradient-dark: linear-gradient(180deg, hsl(0 0% 98%) 0%, hsl(0 0% 94%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%) 0%, hsl(0 0% 96%) 100%);
+    
+    --shadow-lime: 0 0 40px hsl(72 94% 46% / 0.15);
+    --shadow-card: 0 10px 40px hsl(0 0% 0% / 0.08);
+    --shadow-elevated: 0 20px 60px hsl(0 0% 0% / 0.12);
+
+    /* Sidebar tokens - Light */
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 0 0% 11%;
+    --sidebar-primary: 72 94% 40%;
+    --sidebar-primary-foreground: 0 0% 11%;
+    --sidebar-accent: 0 0% 94%;
+    --sidebar-accent-foreground: 0 0% 20%;
+    --sidebar-border: 0 0% 85%;
+    --sidebar-ring: 72 94% 40%;
   }
 }
 

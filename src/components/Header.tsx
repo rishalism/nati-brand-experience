@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, ShoppingBag } from 'lucide-react';
 import NatiLogo from './NatiLogo';
+import ThemeToggle from './ThemeToggle';
 import { Button } from './ui/button';
 
 interface HeaderProps {
@@ -58,8 +59,9 @@ const Header: React.FC<HeaderProps> = ({ cartCount, onCartClick }) => {
             ))}
           </nav>
 
-          {/* CTA Button / Cart */}
+          {/* CTA Button / Cart / Theme Toggle */}
           <div className="hidden md:flex items-center gap-4">
+            <ThemeToggle />
             {isShopPage && onCartClick ? (
               <button
                 onClick={onCartClick}
