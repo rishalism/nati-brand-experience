@@ -17,6 +17,7 @@ const Header: React.FC<HeaderProps> = ({ cartCount, onCartClick }) => {
 
   useEffect(() => {
     const handleScroll = () => {
+      
       setIsScrolled(window.scrollY > 20);
     };
     window.addEventListener('scroll', handleScroll);
@@ -93,7 +94,7 @@ const Header: React.FC<HeaderProps> = ({ cartCount, onCartClick }) => {
 
         {/* Mobile Menu */}
         <div 
-          className={`md:hidden overflow-hidden transition-all duration-300 ${
+          className={`md:hidden bg-background/50 backdrop-blur-md border-b border-border/50 overflow-hidden transition-all duration-300 ${
             isMobileMenuOpen ? 'max-h-96 pb-6' : 'max-h-0'
           }`}
         >
