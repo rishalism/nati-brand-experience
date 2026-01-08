@@ -30,21 +30,21 @@ const HeroSection: React.FC = () => {
   return (
     <section 
       ref={heroRef}
-      className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20"
+      className="relative min-h-screen flex items-center justify-center  overflow-hidden pt-20"
     >
       {/* Ambient background effects */}
       <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-background" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent" />
       
       {/* Subtle grid pattern */}
-      <div className="absolute inset-0 opacity-[0.02]" style={{
+      <div className="absolute inset-0  opacity-[0.02]" style={{
         backgroundImage: `linear-gradient(hsl(var(--foreground)) 1px, transparent 1px),
                           linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)`,
         backgroundSize: '60px 60px'
       }} />
 
-      <div className="container relative z-10 px-6 md:px-8 py-16 md:py-24">
-        <div className="grid lg:grid-cols-2 gap-16 lg:gap-20 items-center">
+      <div className="container flex items-center justify-center relative  z-10 px-6 md:px-8 py-16 md:py-24">
+        <div className="grid lg:grid-cols-2 gap-16   lg:gap-20 items-center">
           {/* Text Content */}
           <div className="text-center lg:text-left order-2 lg:order-1">
             <div className="fade-up space-y-8">
@@ -54,8 +54,8 @@ const HeroSection: React.FC = () => {
               </p>
               
               {/* Main Headline */}
-              <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-display font-bold leading-[0.95] tracking-tight">
-                <span className="text-foreground">Rehydrate</span>
+              <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl  font-display font-bold leading-[0.95] tracking-tight">
+                <span className="text-foreground ">Rehydrate</span>
                 <br />
                 <span className="text-gradient-lime">Right</span>
               </h1>
@@ -69,7 +69,7 @@ const HeroSection: React.FC = () => {
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-2">
                 <Link to="/login">
-                  <Button variant="hero" size="xl" className="group btn-glow">
+                  <Button variant="hero" size="xl" className="group btn-glow w-full">
                     Shop Now
                     <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
                   </Button>
@@ -103,12 +103,10 @@ const HeroSection: React.FC = () => {
           </div>
 
           {/* Product Image */}
-          <div className="fade-up order-1 lg:order-2 flex justify-center" style={{ transitionDelay: '200ms' }}>
+          <div className="fade-up  lg:order-2 flex justify-center" style={{ transitionDelay: '200ms' }}>
             <div className="relative">
-              {/* Ambient glow */}
               <div className="absolute inset-0 blur-[80px] bg-primary/20 rounded-full scale-90 animate-glow-pulse" />
               
-              {/* Product image */}
               <img
                 src={heroProduct}
                 alt="NATI Electrolyte Powder Pouches"

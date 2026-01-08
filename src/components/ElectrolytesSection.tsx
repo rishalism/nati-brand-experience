@@ -58,10 +58,10 @@ const ElectrolytesSection: React.FC = () => {
               {electrolytes.map((item, index) => (
                 <div
                   key={item.symbol}
-                  className="fade-up group"
+                  className="fade-up group "
                   style={{ transitionDelay: `${150 + index * 50}ms` }}
                 >
-                  <div className="glass-card-hover p-5">
+                  <div className="glass-card-hover p-5 h-full">
                     <div className="flex items-baseline gap-2 mb-2">
                       <span className="text-2xl font-display font-bold text-primary">
                         {item.symbol}
