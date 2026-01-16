@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Button } from './ui/button';
-import { ArrowDown, ArrowRight } from 'lucide-react';
-import heroProduct from '@/assets/hero-product.jpg';
+import { ArrowRight } from 'lucide-react';
+import heroProduct from '@/assets/product-sachets-hero.jpg';
 import { Link } from 'react-router-dom';
 
 const HeroSection: React.FC = () => {
@@ -30,97 +30,82 @@ const HeroSection: React.FC = () => {
   return (
     <section 
       ref={heroRef}
-      className="relative min-h-screen flex items-center justify-center  overflow-hidden pt-20"
+      className="relative min-h-screen flex items-center overflow-hidden"
     >
-      {/* Ambient background effects */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-background" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent" />
-      
-      {/* Subtle grid pattern */}
-      <div className="absolute inset-0  opacity-[0.02]" style={{
-        backgroundImage: `linear-gradient(hsl(var(--foreground)) 1px, transparent 1px),
-                          linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)`,
-        backgroundSize: '60px 60px'
-      }} />
+      {/* Full-screen background image */}
+      <div className="absolute inset-0 z-0">
+        <img
+          src={heroProduct}
+          alt="NATI Electrolyte Products"
+          className="w-full h-full object-cover object-center"
+        />
+        {/* Dark overlay for text readability */}
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/40" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/60" />
+      </div>
 
-      <div className="container flex items-center justify-center relative  z-10 px-6 md:px-8 py-16 md:py-24">
-        <div className="grid lg:grid-cols-2 gap-16   lg:gap-20 items-center">
-          {/* Text Content */}
-          <div className="text-center lg:text-left order-2 lg:order-1">
-            <div className="fade-up space-y-8">
-              {/* Tagline */}
-              <p className="premium-label">
-                Premium Electrolyte Mix
-              </p>
-              
-              {/* Main Headline */}
-              <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl  font-display font-bold leading-[0.95] tracking-tight">
-                <span className="text-foreground ">Rehydrate</span>
-                <br />
-                <span className="text-gradient-lime">Right</span>
-              </h1>
-              
-              {/* Description */}
-              <p className="text-muted-foreground text-lg md:text-xl max-w-lg mx-auto lg:mx-0 leading-relaxed font-light">
-                Expertly formulated with 6 essential electrolytes. 
-                Designed for athletes, loved by everyone.
-              </p>
-              
-              {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-2">
-                <Link to="/login">
-                  <Button variant="hero" size="xl" className="group btn-glow w-full">
-                    Shop Now
-                    <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
-                  </Button>
-                </Link>
-                <Button variant="hero-outline" size="xl">
-                  Learn More
+      {/* Content overlay */}
+      <div className="container relative z-10 px-6 md:px-8 py-24 md:py-32 lg:py-40">
+        <div className="max-w-2xl">
+          <div className="fade-up space-y-6 md:space-y-8">
+            {/* Tagline */}
+            <p className="premium-label animate-fade-in">
+              Premium Electrolyte Mix
+            </p>
+            
+            {/* Main Headline */}
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-display font-bold leading-[0.95] tracking-tight">
+              <span className="text-foreground block">Rehydrate</span>
+              <span className="text-gradient-lime italic font-serif">Right</span>
+            </h1>
+            
+            {/* Description */}
+            <p className="text-muted-foreground text-base sm:text-lg md:text-xl max-w-md leading-relaxed font-light">
+              Expertly formulated with 6 essential electrolytes. 
+              Designed for athletes, loved by everyone.
+            </p>
+            
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2">
+              <Link to="/login" className="w-full sm:w-auto">
+                <Button variant="hero" size="xl" className="group btn-glow w-full sm:w-auto">
+                  Shop Now
+                  <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
                 </Button>
-              </div>
-
-              {/* Stats */}
-              <div className="flex items-center justify-center lg:justify-start gap-10 pt-10">
-                {[
-                  { value: '6', label: 'Electrolytes' },
-                  { value: '0', label: 'Added Sugar' },
-                  { value: '100%', label: 'Natural' },
-                ].map((stat, i) => (
-                  <React.Fragment key={stat.label}>
-                    {i > 0 && <div className="w-px h-14 bg-border/50" />}
-                    <div className="text-center">
-                      <p className="text-3xl md:text-4xl font-display font-bold text-primary mb-1">
-                        {stat.value}
-                      </p>
-                      <p className="text-xs text-muted-foreground uppercase tracking-widest">
-                        {stat.label}
-                      </p>
-                    </div>
-                  </React.Fragment>
-                ))}
-              </div>
+              </Link>
+              <Button variant="hero-outline" size="xl" className="w-full sm:w-auto">
+                Learn More
+              </Button>
             </div>
-          </div>
 
-          {/* Product Image */}
-          <div className="fade-up  lg:order-2 flex justify-center" style={{ transitionDelay: '200ms' }}>
-            <div className="relative">
-              <div className="absolute inset-0 blur-[80px] bg-primary/20 rounded-full scale-90 animate-glow-pulse" />
-              
-              <img
-                src={heroProduct}
-                alt="NATI Electrolyte Powder Pouches"
-                className="relative z-10 w-full max-w-sm md:max-w-md lg:max-w-lg rounded-3xl animate-float-slow"
-              />
+            {/* Stats */}
+            <div className="flex items-center justify-start gap-6 sm:gap-10 pt-6 md:pt-10">
+              {[
+                { value: '6', label: 'Electrolytes' },
+                { value: '0', label: 'Added Sugar' },
+                { value: '100%', label: 'Natural' },
+              ].map((stat, i) => (
+                <React.Fragment key={stat.label}>
+                  {i > 0 && <div className="w-px h-12 sm:h-14 bg-border/50" />}
+                  <div className="text-center">
+                    <p className="text-2xl sm:text-3xl md:text-4xl font-display font-bold text-primary mb-1">
+                      {stat.value}
+                    </p>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-widest">
+                      {stat.label}
+                    </p>
+                  </div>
+                </React.Fragment>
+              ))}
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Scroll indicator */}
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 hidden md:flex flex-col items-center gap-3">
-          <span className="text-xs text-muted-foreground uppercase tracking-[0.2em] font-medium">Discover</span>
-          <div className="w-px h-12 bg-gradient-to-b from-muted-foreground/50 to-transparent" />
-        </div>
+      {/* Scroll indicator */}
+      <div className="absolute bottom-8 md:bottom-10 left-1/2 -translate-x-1/2 hidden md:flex flex-col items-center gap-3 z-10">
+        <span className="text-xs text-muted-foreground uppercase tracking-[0.2em] font-medium">Discover</span>
+        <div className="w-px h-12 bg-gradient-to-b from-muted-foreground/50 to-transparent" />
       </div>
     </section>
   );
