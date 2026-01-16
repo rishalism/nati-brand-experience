@@ -5,7 +5,9 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
-import productImage from '@/assets/product-sachet-single.jpg';
+import productSachetsHero from '@/assets/product-sachets-hero.jpg';
+import productSachetsDetail from '@/assets/product-sachets-detail.jpg';
+import productBoxes from '@/assets/product-boxes.jpg';
 
 interface Review {
   id: string;
@@ -28,6 +30,7 @@ const products = {
     badge: undefined as string | undefined,
     isSubscription: false,
     subscriptionText: undefined as string | undefined,
+    images: [productSachetsHero, productSachetsDetail, productBoxes],
   },
   bundle: {
     id: 'bundle',
@@ -40,6 +43,7 @@ const products = {
     badge: 'MOST POPULAR',
     isSubscription: false,
     subscriptionText: undefined as string | undefined,
+    images: [productBoxes, productSachetsHero, productSachetsDetail],
   },
   subscription: {
     id: 'subscription',
@@ -52,6 +56,7 @@ const products = {
     badge: undefined as string | undefined,
     isSubscription: true,
     subscriptionText: 'per month',
+    images: [productSachetsDetail, productBoxes, productSachetsHero],
   },
 };
 
@@ -103,6 +108,7 @@ const ProductDetail = () => {
   const { productId } = useParams<{ productId: string }>();
   const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   // Check authentication
   useEffect(() => {
@@ -140,7 +146,7 @@ const ProductDetail = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="pt-24 pb-20">
+      <main className="pt-20 md:pt-24 pb-16 md:pb-20">
         {/* Back Link */}
         <div className="container py-4">
           <Link 
@@ -153,48 +159,50 @@ const ProductDetail = () => {
         </div>
 
         {/* Product Hero */}
-        <section className="container py-8 md:py-16">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
-            {/* Product Image */}
-            <div className="relative">
+        <section className="container py-6 md:py-12 lg:py-16">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 xl:gap-20">
+            {/* Product Images */}
+            <div className="space-y-4">
               {product.badge && (
-                <div className="absolute top-4 left-4 z-10 bg-primary text-primary-foreground px-4 py-2 text-sm font-heading tracking-wider">
+                <div className="inline-block bg-primary text-primary-foreground px-4 py-2 text-sm font-heading tracking-wider mb-2">
                   {product.badge}
                 </div>
               )}
+              {/* Main Image */}
               <div className="aspect-square bg-card rounded-lg overflow-hidden border border-border">
                 <img
-                  src={productImage}
+                  src={product.images[selectedImageIndex]}
                   alt={product.name}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-all duration-500"
                 />
               </div>
               {/* Thumbnails */}
-              <div className="flex gap-4 mt-4">
-                {[1, 2, 3].map((i) => (
-                  <div 
+              <div className="flex gap-3 md:gap-4">
+                {product.images.map((img, i) => (
+                  <button 
                     key={i}
-                    className={`w-20 h-20 bg-card rounded border cursor-pointer transition-all ${
-                      i === 1 ? 'border-primary' : 'border-border hover:border-primary/50'
+                    onClick={() => setSelectedImageIndex(i)}
+                    className={`w-16 h-16 sm:w-20 sm:h-20 bg-card rounded-lg overflow-hidden border-2 cursor-pointer transition-all flex-shrink-0 ${
+                      i === selectedImageIndex ? 'border-primary ring-2 ring-primary/20' : 'border-border hover:border-primary/50'
                     }`}
                   >
                     <img
-                      src={productImage}
-                      alt={`${product.name} view ${i}`}
-                      className="w-full h-full object-cover rounded"
+                      src={img}
+                      alt={`${product.name} view ${i + 1}`}
+                      className="w-full h-full object-cover"
                     />
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
 
             {/* Product Info */}
-            <div className="space-y-8">
+            <div className="space-y-6 md:space-y-8">
               <div>
-                <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl text-foreground tracking-wider mb-4">
+                <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-foreground tracking-wider mb-4">
                   {product.name}
                 </h1>
-                <p className="text-muted-foreground font-body text-lg leading-relaxed">
+                <p className="text-muted-foreground font-body text-base md:text-lg leading-relaxed">
                   {product.fullDescription}
                 </p>
               </div>
@@ -216,24 +224,24 @@ const ProductDetail = () => {
               </div>
 
               {/* Pricing */}
-              <div className="flex items-baseline gap-4">
-                <span className="font-heading text-4xl text-primary">
+              <div className="flex items-baseline gap-3 md:gap-4 flex-wrap">
+                <span className="font-heading text-3xl md:text-4xl text-primary">
                   ${product.price.toFixed(2)}
                 </span>
                 {product.originalPrice && (
-                  <span className="text-muted-foreground text-xl line-through">
+                  <span className="text-muted-foreground text-lg md:text-xl line-through">
                     ${product.originalPrice.toFixed(2)}
                   </span>
                 )}
                 {product.isSubscription && product.subscriptionText && (
-                  <span className="text-muted-foreground text-lg">
+                  <span className="text-muted-foreground text-base md:text-lg">
                     {product.subscriptionText}
                   </span>
                 )}
               </div>
 
               {/* Key Benefits */}
-              <div className="space-y-3">
+              <div className="space-y-2 md:space-y-3">
                 {[
                   `${product.sachets} premium sachets`,
                   '6 essential electrolytes',
@@ -241,26 +249,26 @@ const ProductDetail = () => {
                   'Lab tested for purity',
                 ].map((benefit, idx) => (
                   <div key={idx} className="flex items-center gap-3">
-                    <Check size={18} className="text-primary" />
-                    <span className="text-foreground font-body">{benefit}</span>
+                    <Check size={18} className="text-primary flex-shrink-0" />
+                    <span className="text-foreground font-body text-sm md:text-base">{benefit}</span>
                   </div>
                 ))}
               </div>
 
               {/* Quantity & Add to Cart */}
-              <div className="flex flex-col sm:flex-row gap-4">
-                <div className="flex items-center border border-border rounded-lg">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                <div className="flex items-center border border-border rounded-lg w-fit">
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="p-4 hover:bg-muted/50 transition-colors"
+                    className="p-3 md:p-4 hover:bg-muted/50 transition-colors"
                     aria-label="Decrease quantity"
                   >
                     <Minus size={18} />
                   </button>
-                  <span className="px-6 font-heading text-xl">{quantity}</span>
+                  <span className="px-4 md:px-6 font-heading text-lg md:text-xl min-w-[3rem] text-center">{quantity}</span>
                   <button
                     onClick={() => setQuantity(quantity + 1)}
-                    className="p-4 hover:bg-muted/50 transition-colors"
+                    className="p-3 md:p-4 hover:bg-muted/50 transition-colors"
                     aria-label="Increase quantity"
                   >
                     <Plus size={18} />
@@ -270,7 +278,7 @@ const ProductDetail = () => {
                   onClick={handleAddToCart}
                   variant="hero"
                   size="lg"
-                  className="flex-1"
+                  className="flex-1 min-h-[48px]"
                 >
                   {product.isSubscription ? 'SUBSCRIBE NOW' : 'ADD TO CART'}
                 </Button>
@@ -280,21 +288,21 @@ const ProductDetail = () => {
         </section>
 
         {/* Ingredients Section */}
-        <section className="container py-16 border-t border-border">
-          <h2 className="font-heading text-3xl md:text-4xl text-foreground tracking-wider mb-8">
+        <section className="container py-12 md:py-16 border-t border-border">
+          <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl text-foreground tracking-wider mb-6 md:mb-8">
             WHAT'S <span className="text-primary">INSIDE</span>
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {ingredients.map((ingredient, idx) => (
               <div 
                 key={idx}
-                className="bg-card border border-border rounded-lg p-6 hover:border-primary/50 transition-colors"
+                className="bg-card border border-border rounded-lg p-4 md:p-6 hover:border-primary/50 transition-colors"
               >
                 <div className="flex items-baseline justify-between mb-2">
-                  <h3 className="font-heading text-xl text-foreground tracking-wider">
+                  <h3 className="font-heading text-lg md:text-xl text-foreground tracking-wider">
                     {ingredient.name}
                   </h3>
-                  <span className="font-heading text-primary text-lg">
+                  <span className="font-heading text-primary text-base md:text-lg">
                     {ingredient.amount}
                   </span>
                 </div>
@@ -307,9 +315,9 @@ const ProductDetail = () => {
         </section>
 
         {/* Reviews Section */}
-        <section className="container py-16 border-t border-border">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="font-heading text-3xl md:text-4xl text-foreground tracking-wider">
+        <section className="container py-12 md:py-16 border-t border-border">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 md:mb-8">
+            <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl text-foreground tracking-wider">
               CUSTOMER <span className="text-primary">REVIEWS</span>
             </h2>
             <div className="flex items-center gap-2">
@@ -317,27 +325,27 @@ const ProductDetail = () => {
                 {[1, 2, 3, 4, 5].map((star) => (
                   <Star
                     key={star}
-                    size={20}
+                    size={18}
                     className={star <= Math.round(averageRating) ? 'fill-primary text-primary' : 'text-muted-foreground'}
                   />
                 ))}
               </div>
-              <span className="font-heading text-xl text-foreground">
+              <span className="font-heading text-lg md:text-xl text-foreground">
                 {averageRating.toFixed(1)}
               </span>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             {reviews.map((review) => (
               <div 
                 key={review.id}
-                className="bg-card border border-border rounded-lg p-6"
+                className="bg-card border border-border rounded-lg p-4 md:p-6"
               >
-                <div className="flex items-start justify-between mb-4">
+                <div className="flex items-start justify-between mb-3 md:mb-4">
                   <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-heading text-lg text-foreground">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-heading text-base md:text-lg text-foreground">
                         {review.author}
                       </span>
                       {review.verified && (
@@ -346,7 +354,7 @@ const ProductDetail = () => {
                         </span>
                       )}
                     </div>
-                    <span className="text-muted-foreground text-sm font-body">
+                    <span className="text-muted-foreground text-xs md:text-sm font-body">
                       {new Date(review.date).toLocaleDateString('en-US', {
                         year: 'numeric',
                         month: 'long',
@@ -354,7 +362,7 @@ const ProductDetail = () => {
                       })}
                     </span>
                   </div>
-                  <div className="flex items-center gap-0.5">
+                  <div className="flex items-center gap-0.5 flex-shrink-0">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <Star
                         key={star}
@@ -364,7 +372,7 @@ const ProductDetail = () => {
                     ))}
                   </div>
                 </div>
-                <p className="text-foreground font-body leading-relaxed">
+                <p className="text-foreground font-body text-sm md:text-base leading-relaxed">
                   {review.comment}
                 </p>
               </div>
