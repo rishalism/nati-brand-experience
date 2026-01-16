@@ -54,10 +54,10 @@ const HeroSection: React.FC = () => {
               </p>
               
               {/* Main Headline */}
-              <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl  font-display font-bold leading-[0.95] tracking-tight">
-                <span className="text-foreground ">Rehydrate</span>
+              <h1 className="text-5xl sm:text-6xl michroma-regular md:text-7xl lg:text-8xl  font-display font-bold leading-[0.95] tracking-tight">
+                <span className="text-foreground  michroma-regular">Rehydrate</span>
                 <br />
-                <span className="text-gradient-lime">Right</span>
+                <span className="text-gradient-lime michroma-regular">Right</span>
               </h1>
               
               {/* Description */}
