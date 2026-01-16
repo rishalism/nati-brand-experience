@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Button } from './ui/button';
 import { ArrowRight } from 'lucide-react';
 import heroProduct from '@/assets/product-sachets-hero.jpg';
@@ -6,6 +6,22 @@ import { Link } from 'react-router-dom';
 
 const HeroSection: React.FC = () => {
   const heroRef = useRef<HTMLDivElement>(null);
+  const [scrollY, setScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (heroRef.current) {
+        const rect = heroRef.current.getBoundingClientRect();
+        // Only update when hero is visible
+        if (rect.bottom > 0) {
+          setScrollY(window.scrollY);
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -27,18 +43,28 @@ const HeroSection: React.FC = () => {
     return () => observer.disconnect();
   }, []);
 
+  // Parallax transform value - image moves slower than scroll
+  const parallaxOffset = scrollY * 0.4;
+
   return (
     <section 
       ref={heroRef}
       className="relative min-h-screen flex items-center overflow-hidden"
     >
-      {/* Full-screen background image */}
-      <div className="absolute inset-0 z-0">
-        <img
-          src={heroProduct}
-          alt="NATI Electrolyte Products"
-          className="w-full h-full object-cover object-center"
-        />
+      {/* Full-screen background image with parallax */}
+      <div className="absolute inset-0 z-0 overflow-hidden">
+        <div 
+          className="absolute inset-0 w-full h-[120%] -top-[10%] transition-transform duration-100 ease-out will-change-transform"
+          style={{ 
+            transform: `translateY(${parallaxOffset}px) scale(1.1)`,
+          }}
+        >
+          <img
+            src={heroProduct}
+            alt="NATI Electrolyte Products"
+            className="w-full h-full object-cover object-center"
+          />
+        </div>
         {/* Dark overlay for text readability */}
         <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/40" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/60" />
@@ -102,10 +128,16 @@ const HeroSection: React.FC = () => {
         </div>
       </div>
 
-      {/* Scroll indicator */}
-      <div className="absolute bottom-8 md:bottom-10 left-1/2 -translate-x-1/2 hidden md:flex flex-col items-center gap-3 z-10">
+      {/* Scroll indicator with subtle animation */}
+      <div 
+        className="absolute bottom-8 md:bottom-10 left-1/2 -translate-x-1/2 hidden md:flex flex-col items-center gap-3 z-10"
+        style={{ 
+          opacity: Math.max(0, 1 - scrollY / 300),
+          transform: `translateX(-50%) translateY(${scrollY * 0.2}px)` 
+        }}
+      >
         <span className="text-xs text-muted-foreground uppercase tracking-[0.2em] font-medium">Discover</span>
-        <div className="w-px h-12 bg-gradient-to-b from-muted-foreground/50 to-transparent" />
+        <div className="w-px h-12 bg-gradient-to-b from-muted-foreground/50 to-transparent animate-pulse" />
       </div>
     </section>
   );
