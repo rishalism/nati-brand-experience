@@ -37,3 +37,22 @@ export const PAYMENT_STATUS = {
   REFUNDED: "REFUNDED",
 } as const;
 export type PaymentStatus = (typeof PAYMENT_STATUS)[keyof typeof PAYMENT_STATUS];
+
+export const PRODUCT_STATUS = {
+  DRAFT: "DRAFT",
+  ACTIVE: "ACTIVE",
+  ARCHIVED: "ARCHIVED",
+} as const;
+export type ProductStatus = (typeof PRODUCT_STATUS)[keyof typeof PRODUCT_STATUS];
+
+// Reason for a stock movement — the append-only inventory ledger.
+export const INVENTORY_MOVEMENT_REASON = {
+  RESTOCK: "RESTOCK",
+  SALE: "SALE",
+  ADJUSTMENT: "ADJUSTMENT",
+  RETURN: "RETURN",
+  RESERVATION: "RESERVATION",
+  RELEASE: "RELEASE",
+} as const;
+export type InventoryMovementReason =
+  (typeof INVENTORY_MOVEMENT_REASON)[keyof typeof INVENTORY_MOVEMENT_REASON];

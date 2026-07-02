@@ -17,6 +17,9 @@ build
 # Prisma
 backend/prisma/*.db
 
+# Local uploads (dev storage provider)
+backend/uploads
+
 # Logs
 logs
 *.log

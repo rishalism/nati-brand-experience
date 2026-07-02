@@ -42,6 +42,18 @@ export class AppConfigService {
     return this.get('WEB_URL');
   }
 
+  get publicApiUrl(): string {
+    return this.get('PUBLIC_API_URL');
+  }
+
+  get cloudinary(): { cloudName?: string; apiKey?: string; apiSecret?: string } {
+    return {
+      cloudName: this.get('CLOUDINARY_CLOUD_NAME'),
+      apiKey: this.get('CLOUDINARY_API_KEY'),
+      apiSecret: this.get('CLOUDINARY_API_SECRET'),
+    };
+  }
+
   get email(): { resendApiKey?: string; from: string } {
     return { resendApiKey: this.get('RESEND_API_KEY'), from: this.get('EMAIL_FROM') };
   }

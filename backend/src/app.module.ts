@@ -12,10 +12,15 @@ import { RolesGuard } from './common/guards/roles.guard';
 import { PermissionsGuard } from './common/guards/permissions.guard';
 import { HealthModule } from './modules/health/health.module';
 import { EmailModule } from './modules/email/email.module';
+import { StorageModule } from './modules/storage/storage.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { RolesModule } from './modules/roles/roles.module';
 import { AddressesModule } from './modules/addresses/addresses.module';
+import { BrandsModule } from './modules/brands/brands.module';
+import { CategoriesModule } from './modules/categories/categories.module';
+import { ProductsModule } from './modules/products/products.module';
+import { InventoryModule } from './modules/inventory/inventory.module';
 
 @Module({
   imports: [
@@ -48,11 +53,16 @@ import { AddressesModule } from './modules/addresses/addresses.module';
     }),
     PrismaModule,
     EmailModule,
+    StorageModule,
     HealthModule,
     AuthModule,
     UsersModule,
     RolesModule,
     AddressesModule,
+    BrandsModule,
+    CategoriesModule,
+    ProductsModule,
+    InventoryModule,
   ],
   providers: [
     // Global guards run in this order:

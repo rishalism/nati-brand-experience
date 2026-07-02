@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from 'nestjs-pino';
 import helmet from 'helmet';
@@ -8,9 +9,10 @@ import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { AppConfigService } from './config/app-config.service';
+import { UPLOADS_DIR } from './modules/storage/storage.module';
 
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });
 
   // Route all pino logs through Nest's logger.
   app.useLogger(app.get(Logger));
@@ -18,9 +20,17 @@ async function bootstrap(): Promise<void> {
   const config = app.get(AppConfigService);
 
   // --- Security & infra middleware ---
-  app.use(helmet());
+  app.use(
+    helmet({
+      // Allow images served from this API to be embedded cross-origin (frontend).
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+    }),
+  );
   app.use(compression());
   app.use(cookieParser(config.cookie.secret));
+
+  // Serve locally-stored uploads (no-op in prod when Cloudinary is used).
+  app.useStaticAssets(UPLOADS_DIR, { prefix: '/uploads' });
 
   app.enableCors({
     origin: config.corsOrigin,

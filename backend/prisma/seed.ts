@@ -87,7 +87,74 @@ async function main(): Promise<void> {
     create: { userId: admin.id, roleId: superAdminRole.id },
   });
 
+  await seedCatalog();
+
   console.log(`Seed complete. Super admin: ${adminEmail}`);
+}
+
+// Seeds the NATI brand/category and the original storefront products with stock.
+async function seedCatalog(): Promise<void> {
+  const brand = await prisma.brand.upsert({
+    where: { slug: 'nati' },
+    update: {},
+    create: { name: 'NATI', slug: 'nati', description: 'Premium electrolyte hydration.' },
+  });
+
+  const category = await prisma.category.upsert({
+    where: { slug: 'electrolytes' },
+    update: {},
+    create: { name: 'Electrolytes', slug: 'electrolytes' },
+  });
+
+  const products = [
+    {
+      slug: 'nati-single-pack',
+      name: 'NATI Single Pack',
+      description: 'Perfect for trying out. 10 sachets of pure electrolyte power.',
+      price: 29.99,
+      compareAtPrice: 39.99,
+      isFeatured: false,
+      stock: 200,
+    },
+    {
+      slug: 'nati-bundle',
+      name: 'NATI Bundle',
+      description: 'Best value. 30 sachets for the committed athlete.',
+      price: 69.99,
+      compareAtPrice: 99.99,
+      isFeatured: true,
+      stock: 150,
+    },
+    {
+      slug: 'nati-monthly',
+      name: 'NATI Monthly',
+      description: 'Never run out. 30 sachets delivered monthly.',
+      price: 59.99,
+      compareAtPrice: null,
+      isFeatured: false,
+      stock: 100,
+    },
+  ];
+
+  for (const p of products) {
+    await prisma.product.upsert({
+      where: { slug: p.slug },
+      update: {},
+      create: {
+        name: p.name,
+        slug: p.slug,
+        description: p.description,
+        price: p.price,
+        compareAtPrice: p.compareAtPrice,
+        currency: 'USD',
+        status: 'ACTIVE',
+        isFeatured: p.isFeatured,
+        brandId: brand.id,
+        categoryId: category.id,
+        inventory: { create: { quantity: p.stock, lowStockThreshold: 20 } },
+      },
+    });
+  }
 }
 
 main()
