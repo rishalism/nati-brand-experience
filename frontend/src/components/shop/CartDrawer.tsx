@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { X, Minus, Plus, ShoppingBag, Trash2, Tag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,6 +16,7 @@ import {
 
 /** Self-contained cart drawer backed by the server cart. */
 const CartDrawer = () => {
+  const navigate = useNavigate();
   const { isOpen, close } = useCartUi();
   const { data: cart } = useCart();
   const updateItem = useUpdateCartItem();
@@ -169,7 +171,10 @@ const CartDrawer = () => {
               variant="hero"
               className="w-full"
               size="lg"
-              onClick={() => toast({ title: 'Checkout', description: 'Checkout arrives in the next phase.' })}
+              onClick={() => {
+                close();
+                navigate('/checkout');
+              }}
             >
               CHECKOUT
             </Button>

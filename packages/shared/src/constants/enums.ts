@@ -51,6 +51,15 @@ export const DISCOUNT_TYPE = {
 } as const;
 export type DiscountType = (typeof DISCOUNT_TYPE)[keyof typeof DISCOUNT_TYPE];
 
+// Checkout payment methods. Razorpay + COD implemented; others reserved.
+export const PAYMENT_METHOD = {
+  RAZORPAY: "RAZORPAY",
+  COD: "COD",
+  STRIPE: "STRIPE",
+  PAYPAL: "PAYPAL",
+} as const;
+export type PaymentMethod = (typeof PAYMENT_METHOD)[keyof typeof PAYMENT_METHOD];
+
 // Reason for a stock movement — the append-only inventory ledger.
 export const INVENTORY_MOVEMENT_REASON = {
   RESTOCK: "RESTOCK",

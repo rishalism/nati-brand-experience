@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart } from 'lucide-react';
+import { Heart, Package } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ProductCard from '@/components/shop/ProductCard';
@@ -142,11 +142,18 @@ const Shop = () => {
                 ))}
               </SelectContent>
             </Select>
-            <Link to="/wishlist" className="md:ml-auto">
-              <Button variant="outline" className="w-full md:w-auto gap-2">
-                <Heart className="h-4 w-4" /> Wishlist
-              </Button>
-            </Link>
+            <div className="flex gap-2 md:ml-auto">
+              <Link to="/orders">
+                <Button variant="outline" className="w-full md:w-auto gap-2">
+                  <Package className="h-4 w-4" /> Orders
+                </Button>
+              </Link>
+              <Link to="/wishlist">
+                <Button variant="outline" className="w-full md:w-auto gap-2">
+                  <Heart className="h-4 w-4" /> Wishlist
+                </Button>
+              </Link>
+            </div>
           </div>
 
           {/* Product Grid */}

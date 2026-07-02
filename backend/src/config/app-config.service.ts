@@ -58,6 +58,10 @@ export class AppConfigService {
     return { resendApiKey: this.get('RESEND_API_KEY'), from: this.get('EMAIL_FROM') };
   }
 
+  get razorpay(): { keyId?: string; keySecret?: string } {
+    return { keyId: this.get('RAZORPAY_KEY_ID'), keySecret: this.get('RAZORPAY_KEY_SECRET') };
+  }
+
   get jwt(): {
     accessSecret: string;
     accessTtl: string;

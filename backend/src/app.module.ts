@@ -24,6 +24,9 @@ import { InventoryModule } from './modules/inventory/inventory.module';
 import { CartModule } from './modules/cart/cart.module';
 import { WishlistModule } from './modules/wishlist/wishlist.module';
 import { CouponsModule } from './modules/coupons/coupons.module';
+import { PaymentsModule } from './modules/payments/payments.module';
+import { OrdersModule } from './modules/orders/orders.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 
 @Module({
   imports: [
@@ -69,6 +72,9 @@ import { CouponsModule } from './modules/coupons/coupons.module';
     CartModule,
     WishlistModule,
     CouponsModule,
+    PaymentsModule,
+    OrdersModule,
+    NotificationsModule,
   ],
   providers: [
     // Global guards run in this order:

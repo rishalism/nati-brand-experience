@@ -44,4 +44,21 @@ export class EmailService {
       text: `Reset your NATI password: ${link}`,
     });
   }
+
+  async sendOrderConfirmation(
+    to: string,
+    order: { orderNumber: string; total: number; currency: string },
+  ): Promise<void> {
+    await this.provider.send({
+      to,
+      subject: `Order ${order.orderNumber} confirmed`,
+      html: wrap(
+        'Order confirmed',
+        `<p>Thanks for your order <strong>${order.orderNumber}</strong>.</p>
+         <p>Total: <strong>${order.currency} ${order.total.toFixed(2)}</strong></p>
+         <p>We'll email you when it ships.</p>`,
+      ),
+      text: `Your NATI order ${order.orderNumber} is confirmed. Total: ${order.currency} ${order.total.toFixed(2)}`,
+    });
+  }
 }
