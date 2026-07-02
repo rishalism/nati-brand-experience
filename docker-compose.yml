@@ -1,0 +1,25 @@
+# Local Postgres for development. On this machine a native PostgreSQL 18 service
+# is already running, so this compose file is optional/portability parity for
+# contributors without a native install. If you use it, keep DATABASE_URL's port
+# in sync (5432 here). Stop the native service or change the port to avoid a clash.
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: nati_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-nati}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-nati}
+      POSTGRES_DB: ${POSTGRES_DB:-nati}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - nati_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-nati} -d ${POSTGRES_DB:-nati}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  nati_pgdata:
