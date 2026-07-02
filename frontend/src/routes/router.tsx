@@ -15,11 +15,13 @@ const ForgotPassword = lazy(() => import("@/customer/pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("@/customer/pages/ResetPassword"));
 const Shop = lazy(() => import("@/customer/pages/Shop"));
 const ProductDetail = lazy(() => import("@/customer/pages/ProductDetail"));
+const Wishlist = lazy(() => import("@/customer/pages/Wishlist"));
 const NotFound = lazy(() => import("@/customer/pages/NotFound"));
 const AdminDashboard = lazy(() => import("@/admin/pages/Dashboard"));
 const AdminProducts = lazy(() => import("@/admin/pages/AdminProducts"));
 const AdminCategories = lazy(() => import("@/admin/pages/AdminCategories"));
 const AdminBrands = lazy(() => import("@/admin/pages/AdminBrands"));
+const AdminCoupons = lazy(() => import("@/admin/pages/AdminCoupons"));
 
 const PageLoader = () => (
   <div className="flex min-h-screen items-center justify-center bg-background">
@@ -48,6 +50,7 @@ export const router = createBrowserRouter([
         children: [
           { path: "/shop", element: withSuspense(<Shop />) },
           { path: "/product/:productId", element: withSuspense(<ProductDetail />) },
+          { path: "/wishlist", element: withSuspense(<Wishlist />) },
         ],
       },
     ],
@@ -64,6 +67,7 @@ export const router = createBrowserRouter([
           { path: "products", element: withSuspense(<AdminProducts />) },
           { path: "categories", element: withSuspense(<AdminCategories />) },
           { path: "brands", element: withSuspense(<AdminBrands />) },
+          { path: "coupons", element: withSuspense(<AdminCoupons />) },
         ],
       },
     ],

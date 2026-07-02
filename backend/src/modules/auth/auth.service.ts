@@ -2,6 +2,7 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
+  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
 import { TokenType } from '@prisma/client';
@@ -32,6 +33,8 @@ export interface AuthResult {
  */
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private readonly users: UsersService,
     private readonly passwords: PasswordService,
@@ -134,7 +137,12 @@ export class AuthService {
     if (!user) return;
     const raw = await this.tokens.issueVerificationToken(user.id, TokenType.PASSWORD_RESET);
     const link = `${this.config.webUrl}/reset-password?token=${raw}`;
-    await this.email.sendPasswordResetEmail(user.email, link);
+    // Never let a mail-delivery failure surface as an error here.
+    try {
+      await this.email.sendPasswordResetEmail(user.email, link);
+    } catch (error) {
+      this.logger.error(`Failed to send password reset email: ${(error as Error).message}`);
+    }
   }
 
   async resetPassword(token: string, newPassword: string): Promise<void> {
@@ -166,7 +174,12 @@ export class AuthService {
   private async sendVerificationEmail(userId: string, email: string): Promise<void> {
     const raw = await this.tokens.issueVerificationToken(userId, TokenType.EMAIL_VERIFICATION);
     const link = `${this.config.webUrl}/verify-email?token=${raw}`;
-    await this.email.sendVerificationEmail(email, link);
+    // Email delivery must not block registration; log and move on if it fails.
+    try {
+      await this.email.sendVerificationEmail(email, link);
+    } catch (error) {
+      this.logger.error(`Failed to send verification email: ${(error as Error).message}`);
+    }
   }
 
   private async issueSession(user: UserWithRoles, ctx: AuthContext): Promise<AuthResult> {

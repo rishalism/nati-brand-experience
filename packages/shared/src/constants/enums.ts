@@ -45,6 +45,12 @@ export const PRODUCT_STATUS = {
 } as const;
 export type ProductStatus = (typeof PRODUCT_STATUS)[keyof typeof PRODUCT_STATUS];
 
+export const DISCOUNT_TYPE = {
+  PERCENTAGE: "PERCENTAGE",
+  FIXED: "FIXED",
+} as const;
+export type DiscountType = (typeof DISCOUNT_TYPE)[keyof typeof DISCOUNT_TYPE];
+
 // Reason for a stock movement — the append-only inventory ledger.
 export const INVENTORY_MOVEMENT_REASON = {
   RESTOCK: "RESTOCK",

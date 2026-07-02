@@ -88,8 +88,36 @@ async function main(): Promise<void> {
   });
 
   await seedCatalog();
+  await seedCoupons();
 
   console.log(`Seed complete. Super admin: ${adminEmail}`);
+}
+
+async function seedCoupons(): Promise<void> {
+  await prisma.coupon.upsert({
+    where: { code: 'WELCOME10' },
+    update: {},
+    create: {
+      code: 'WELCOME10',
+      description: '10% off your order',
+      discountType: 'PERCENTAGE',
+      discountValue: 10,
+      minSubtotal: 0,
+      isActive: true,
+    },
+  });
+  await prisma.coupon.upsert({
+    where: { code: 'SAVE15' },
+    update: {},
+    create: {
+      code: 'SAVE15',
+      description: '$15 off orders over $60',
+      discountType: 'FIXED',
+      discountValue: 15,
+      minSubtotal: 60,
+      isActive: true,
+    },
+  });
 }
 
 // Seeds the NATI brand/category and the original storefront products with stock.

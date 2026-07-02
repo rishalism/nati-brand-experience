@@ -1,4 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Heart } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ProductCard from '@/components/shop/ProductCard';
@@ -14,17 +16,12 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
+import { getErrorMessage } from '@/services/api-client';
 import type { ProductQuery, SortOrder } from '@nati/shared';
 import { useProducts, useCategories } from '@/features/catalog/catalog.hooks';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
-
-export interface CartItem {
-  id: string;
-  name: string;
-  price: number;
-  quantity: number;
-  image: string;
-}
+import { useAddToCart, useCart, useCartUi } from '@/features/cart/cart.hooks';
+import { useToggleWishlist, useWishlistIds } from '@/features/wishlist/wishlist.hooks';
 
 const SORT_OPTIONS: Record<string, { sortBy: string; sortOrder: SortOrder; label: string }> = {
   newest: { sortBy: 'createdAt', sortOrder: 'desc', label: 'Newest' },
@@ -36,9 +33,6 @@ const SORT_OPTIONS: Record<string, { sortBy: string; sortOrder: SortOrder; label
 const PAGE_SIZE = 9;
 
 const Shop = () => {
-  const [cart, setCart] = useState<CartItem[]>([]);
-  const [isCartOpen, setIsCartOpen] = useState(false);
-
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('all');
   const [sort, setSort] = useState('newest');
@@ -60,37 +54,34 @@ const Shop = () => {
 
   const { data, isLoading, isError } = useProducts(query);
   const { data: categories } = useCategories();
+  const { data: cart } = useCart();
+  const cartUi = useCartUi();
+  const addToCart = useAddToCart();
+  const toggleWishlist = useToggleWishlist();
+  const wishlistIds = useWishlistIds();
 
   const resetToFirstPage = () => setPage(1);
 
-  const addToCart = (item: Omit<CartItem, 'quantity'>) => {
-    setCart((prev) => {
-      const existing = prev.find((i) => i.id === item.id);
-      if (existing) {
-        return prev.map((i) => (i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i));
-      }
-      return [...prev, { ...item, quantity: 1 }];
-    });
-    toast({ title: 'Added to Cart', description: `${item.name} has been added to your cart.` });
-  };
-
-  const updateQuantity = (id: string, quantity: number) => {
-    setCart((prev) =>
-      quantity <= 0
-        ? prev.filter((i) => i.id !== id)
-        : prev.map((i) => (i.id === id ? { ...i, quantity } : i)),
+  const handleAddToCart = (productId: string) => {
+    addToCart.mutate(
+      { productId },
+      {
+        onSuccess: () => {
+          toast({ title: 'Added to cart' });
+          cartUi.open();
+        },
+        onError: (error) =>
+          toast({ title: 'Could not add', description: getErrorMessage(error), variant: 'destructive' }),
+      },
     );
   };
-
-  const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-  const cartTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   const products = data?.items ?? [];
   const pagination = data?.pagination;
 
   return (
     <div className="min-h-screen bg-background">
-      <Header cartCount={cartCount} onCartClick={() => setIsCartOpen(true)} />
+      <Header cartCount={cart?.itemCount ?? 0} onCartClick={cartUi.open} />
 
       <main className="pt-24 pb-20">
         <section className="container py-12 md:py-20">
@@ -104,7 +95,7 @@ const Shop = () => {
           </div>
 
           {/* Filters */}
-          <div className="flex flex-col md:flex-row gap-4 max-w-6xl mx-auto mb-10">
+          <div className="flex flex-col md:flex-row gap-4 max-w-6xl mx-auto mb-10 items-stretch md:items-center">
             <Input
               placeholder="Search products..."
               value={search}
@@ -151,6 +142,11 @@ const Shop = () => {
                 ))}
               </SelectContent>
             </Select>
+            <Link to="/wishlist" className="md:ml-auto">
+              <Button variant="outline" className="w-full md:w-auto gap-2">
+                <Heart className="h-4 w-4" /> Wishlist
+              </Button>
+            </Link>
           </div>
 
           {/* Product Grid */}
@@ -172,14 +168,14 @@ const Shop = () => {
                   badge={product.isFeatured ? 'MOST POPULAR' : undefined}
                   image={product.primaryImage ?? undefined}
                   outOfStock={!product.inventory.inStock}
-                  onAddToCart={addToCart}
+                  isWishlisted={wishlistIds.has(product.id)}
+                  onAddToCart={handleAddToCart}
+                  onToggleWishlist={(pid) => toggleWishlist.mutate(pid)}
                 />
               ))}
           </div>
 
-          {isError && (
-            <p className="text-center text-destructive mt-10">Failed to load products.</p>
-          )}
+          {isError && <p className="text-center text-destructive mt-10">Failed to load products.</p>}
           {!isLoading && !isError && products.length === 0 && (
             <p className="text-center text-muted-foreground mt-10">No products found.</p>
           )}
@@ -187,21 +183,13 @@ const Shop = () => {
           {/* Pagination */}
           {pagination && pagination.totalPages > 1 && (
             <div className="flex items-center justify-center gap-4 mt-12">
-              <Button
-                variant="outline"
-                disabled={!pagination.hasPrevPage}
-                onClick={() => setPage((p) => p - 1)}
-              >
+              <Button variant="outline" disabled={!pagination.hasPrevPage} onClick={() => setPage((p) => p - 1)}>
                 Previous
               </Button>
               <span className="text-muted-foreground text-sm">
                 Page {pagination.page} of {pagination.totalPages}
               </span>
-              <Button
-                variant="outline"
-                disabled={!pagination.hasNextPage}
-                onClick={() => setPage((p) => p + 1)}
-              >
+              <Button variant="outline" disabled={!pagination.hasNextPage} onClick={() => setPage((p) => p + 1)}>
                 Next
               </Button>
             </div>
@@ -211,13 +199,7 @@ const Shop = () => {
 
       <Footer />
 
-      <CartDrawer
-        isOpen={isCartOpen}
-        onClose={() => setIsCartOpen(false)}
-        items={cart}
-        onUpdateQuantity={updateQuantity}
-        total={cartTotal}
-      />
+      <CartDrawer />
     </div>
   );
 };

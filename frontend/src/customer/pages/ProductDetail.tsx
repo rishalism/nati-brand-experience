@@ -1,15 +1,20 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Star, Plus, Minus, Check } from 'lucide-react';
+import { ArrowLeft, Star, Plus, Minus, Check, Heart } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import CartDrawer from '@/components/shop/CartDrawer';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
+import { getErrorMessage } from '@/services/api-client';
 import productSachetsHero from '@/assets/product-sachets-hero.jpg';
 import productSachetsDetail from '@/assets/product-sachets-detail.jpg';
 import productBoxes from '@/assets/product-boxes.jpg';
 import { useProduct } from '@/features/catalog/catalog.hooks';
+import { useAddToCart, useCart, useCartUi } from '@/features/cart/cart.hooks';
+import { useToggleWishlist, useWishlistIds } from '@/features/wishlist/wishlist.hooks';
 
 // Fallback gallery when a product has no uploaded images yet.
 const FALLBACK_IMAGES = [productSachetsHero, productSachetsDetail, productBoxes];
@@ -35,6 +40,12 @@ const ProductDetail = () => {
   const { data: product, isLoading, isError } = useProduct(productId);
   const [quantity, setQuantity] = useState(1);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+
+  const { data: cart } = useCart();
+  const cartUi = useCartUi();
+  const addToCart = useAddToCart();
+  const toggleWishlist = useToggleWishlist();
+  const wishlistIds = useWishlistIds();
 
   const averageRating = reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length;
 
@@ -69,17 +80,25 @@ const ProductDetail = () => {
 
   const images = product.images.length > 0 ? product.images.map((i) => i.url) : FALLBACK_IMAGES;
   const inStock = product.inventory.inStock;
+  const isWishlisted = wishlistIds.has(product.id);
 
   const handleAddToCart = () => {
-    toast({
-      title: 'Added to Cart',
-      description: `${quantity}x ${product.name} has been added to your cart.`,
-    });
+    addToCart.mutate(
+      { productId: product.id, quantity },
+      {
+        onSuccess: () => {
+          toast({ title: 'Added to cart', description: `${quantity}x ${product.name}` });
+          cartUi.open();
+        },
+        onError: (error) =>
+          toast({ title: 'Could not add', description: getErrorMessage(error), variant: 'destructive' }),
+      },
+    );
   };
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <Header cartCount={cart?.itemCount ?? 0} onCartClick={cartUi.open} />
 
       <main className="pt-20 md:pt-24 pb-16 md:pb-20">
         <div className="container py-4">
@@ -196,8 +215,17 @@ const ProductDetail = () => {
                     <Plus size={18} />
                   </button>
                 </div>
-                <Button onClick={handleAddToCart} variant="hero" size="lg" className="flex-1 min-h-[48px]" disabled={!inStock}>
+                <Button onClick={handleAddToCart} variant="hero" size="lg" className="flex-1 min-h-[48px]" disabled={!inStock || addToCart.isPending}>
                   {inStock ? 'ADD TO CART' : 'SOLD OUT'}
+                </Button>
+                <Button
+                  onClick={() => toggleWishlist.mutate(product.id)}
+                  variant="outline"
+                  size="lg"
+                  className="min-h-[48px]"
+                  aria-label="Toggle wishlist"
+                >
+                  <Heart className={cn('h-5 w-5', isWishlisted ? 'fill-primary text-primary' : '')} />
                 </Button>
               </div>
             </div>
@@ -256,6 +284,7 @@ const ProductDetail = () => {
       </main>
 
       <Footer />
+      <CartDrawer />
     </div>
   );
 };

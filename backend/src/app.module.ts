@@ -21,6 +21,9 @@ import { BrandsModule } from './modules/brands/brands.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { ProductsModule } from './modules/products/products.module';
 import { InventoryModule } from './modules/inventory/inventory.module';
+import { CartModule } from './modules/cart/cart.module';
+import { WishlistModule } from './modules/wishlist/wishlist.module';
+import { CouponsModule } from './modules/coupons/coupons.module';
 
 @Module({
   imports: [
@@ -63,6 +66,9 @@ import { InventoryModule } from './modules/inventory/inventory.module';
     CategoriesModule,
     ProductsModule,
     InventoryModule,
+    CartModule,
+    WishlistModule,
+    CouponsModule,
   ],
   providers: [
     // Global guards run in this order:

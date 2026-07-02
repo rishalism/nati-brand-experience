@@ -7,6 +7,7 @@ export * from "./types/user";
 export * from "./types/auth";
 export * from "./types/address";
 export * from "./types/catalog";
+export * from "./types/commerce";
 
 // Constants / enums
 export * from "./constants/roles";
@@ -18,3 +19,4 @@ export * from "./schemas/auth.schema";
 export * from "./schemas/user.schema";
 export * from "./schemas/address.schema";
 export * from "./schemas/catalog.schema";
+export * from "./schemas/commerce.schema";
