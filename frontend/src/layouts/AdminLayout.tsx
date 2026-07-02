@@ -1,5 +1,14 @@
 import { Link, NavLink, Outlet } from "react-router-dom";
-import { LayoutDashboard, Package, ShoppingCart, Users, Tag, Settings } from "lucide-react";
+import {
+  LayoutDashboard,
+  Package,
+  Layers,
+  Tags,
+  ShoppingCart,
+  Users,
+  Tag,
+  Settings,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // Admin navigation. Destinations are added as their features land (Phases 3-6);
@@ -7,6 +16,8 @@ import { cn } from "@/lib/utils";
 const NAV_ITEMS = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, end: true },
   { to: "/admin/products", label: "Products", icon: Package },
+  { to: "/admin/categories", label: "Categories", icon: Layers },
+  { to: "/admin/brands", label: "Brands", icon: Tags },
   { to: "/admin/orders", label: "Orders", icon: ShoppingCart },
   { to: "/admin/customers", label: "Customers", icon: Users },
   { to: "/admin/coupons", label: "Coupons", icon: Tag },

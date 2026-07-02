@@ -13,6 +13,8 @@ interface ProductCardProps {
   badge?: string;
   isSubscription?: boolean;
   subscriptionText?: string;
+  image?: string;
+  outOfStock?: boolean;
   onAddToCart: (item: Omit<CartItem, 'quantity'>) => void;
 }
 
@@ -25,8 +27,12 @@ const ProductCard: React.FC<ProductCardProps> = ({
   badge,
   isSubscription,
   subscriptionText,
+  image,
+  outOfStock,
   onAddToCart,
 }) => {
+  const displayImage = image ?? productImage;
+
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -34,7 +40,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
       id,
       name,
       price,
-      image: productImage,
+      image: displayImage,
     });
   };
 
@@ -50,7 +56,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
         {/* Product Image */}
         <div className="relative aspect-square bg-background overflow-hidden">
           <img
-            src={productImage}
+            src={displayImage}
             alt={name}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
@@ -90,8 +96,9 @@ const ProductCard: React.FC<ProductCardProps> = ({
             onClick={handleAddToCart}
             variant="hero"
             className="w-full"
+            disabled={outOfStock}
           >
-            {isSubscription ? 'SUBSCRIBE' : 'ADD TO CART'}
+            {outOfStock ? 'SOLD OUT' : isSubscription ? 'SUBSCRIBE' : 'ADD TO CART'}
           </Button>
         </div>
       </div>

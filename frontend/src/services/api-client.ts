@@ -4,7 +4,7 @@ import axios, {
   type AxiosResponse,
   type InternalAxiosRequestConfig,
 } from "axios";
-import type { ApiResponse } from "@nati/shared";
+import type { ApiResponse, PaginatedData, PaginationMeta } from "@nati/shared";
 import { env } from "@/config/env";
 import { authStore } from "@/features/auth/auth.store";
 
@@ -69,6 +69,22 @@ apiClient.interceptors.response.use(
 export async function unwrap<T>(promise: Promise<AxiosResponse<ApiResponse<T>>>): Promise<T> {
   const { data } = await promise;
   return data.data as T;
+}
+
+/** Unwraps a paginated envelope into { items, pagination } for list endpoints. */
+export async function unwrapPage<T>(
+  promise: Promise<AxiosResponse<ApiResponse<T[]>>>,
+): Promise<PaginatedData<T>> {
+  const { data } = await promise;
+  const pagination: PaginationMeta = data.pagination ?? {
+    page: 1,
+    limit: (data.data ?? []).length,
+    total: (data.data ?? []).length,
+    totalPages: 1,
+    hasNextPage: false,
+    hasPrevPage: false,
+  };
+  return { items: data.data ?? [], pagination };
 }
 
 /** Extracts a human-readable message from an API/Axios error for toasts. */

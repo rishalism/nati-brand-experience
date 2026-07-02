@@ -17,6 +17,9 @@ const Shop = lazy(() => import("@/customer/pages/Shop"));
 const ProductDetail = lazy(() => import("@/customer/pages/ProductDetail"));
 const NotFound = lazy(() => import("@/customer/pages/NotFound"));
 const AdminDashboard = lazy(() => import("@/admin/pages/Dashboard"));
+const AdminProducts = lazy(() => import("@/admin/pages/AdminProducts"));
+const AdminCategories = lazy(() => import("@/admin/pages/AdminCategories"));
+const AdminBrands = lazy(() => import("@/admin/pages/AdminBrands"));
 
 const PageLoader = () => (
   <div className="flex min-h-screen items-center justify-center bg-background">
@@ -56,7 +59,12 @@ export const router = createBrowserRouter([
     children: [
       {
         element: <AdminLayout />,
-        children: [{ index: true, element: withSuspense(<AdminDashboard />) }],
+        children: [
+          { index: true, element: withSuspense(<AdminDashboard />) },
+          { path: "products", element: withSuspense(<AdminProducts />) },
+          { path: "categories", element: withSuspense(<AdminCategories />) },
+          { path: "brands", element: withSuspense(<AdminBrands />) },
+        ],
       },
     ],
   },
