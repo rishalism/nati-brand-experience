@@ -1,0 +1,24 @@
+packages:
+  - "frontend"
+  - "backend"
+  - "packages/*"
+
+# Dependency build scripts that pnpm is allowed to run (native/postinstall builds
+# these packages need). `onlyBuiltDependencies` is the standard pnpm 10+ home for
+# this setting and is what CI/Render use. (`allowBuilds` below is this local
+# environment's supply-chain wrapper equivalent; harmless elsewhere.)
+onlyBuiltDependencies:
+  - "@prisma/client"
+  - "@prisma/engines"
+  - "@swc/core"
+  - argon2
+  - esbuild
+  - prisma
+allowBuilds:
+  '@prisma/client': true
+  '@prisma/engines': true
+  '@scarf/scarf': false
+  '@swc/core': true
+  argon2: true
+  esbuild: true
+  prisma: true

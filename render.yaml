@@ -1,0 +1,81 @@
+# Render Blueprint for the NATI backend (NestJS + Prisma).
+# Deploy: push this file, then in Render → New → Blueprint, point at this repo.
+# Secrets are marked sync:false — set them in the Render dashboard.
+#
+# Notes:
+#  - rootDir is the repo root: the backend depends on the @nati/shared workspace
+#    package, so the whole pnpm workspace must be installed/built.
+#  - buildCommand builds shared first, applies DB migrations, then builds backend.
+#  - Free instances spin down after ~15 min idle and cold-start on the next hit,
+#    and have an EPHEMERAL filesystem — image uploads MUST use Cloudinary (set the
+#    CLOUDINARY_* vars), never the local-disk storage provider.
+services:
+  - type: web
+    name: nati-backend
+    runtime: node
+    plan: free
+    region: singapore # pick the region closest to your Supabase project (ap-southeast-1)
+    rootDir: .
+    autoDeploy: true
+    healthCheckPath: /api/v1/health
+    buildCommand: >-
+      corepack enable &&
+      pnpm install --frozen-lockfile &&
+      pnpm --filter @nati/shared build &&
+      pnpm --filter @nati/backend exec prisma migrate deploy &&
+      pnpm --filter @nati/backend build
+    startCommand: pnpm --filter @nati/backend start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # PORT is provided by Render automatically; the app reads process.env.PORT.
+      - key: API_PREFIX
+        value: api
+      - key: API_VERSION
+        value: "1"
+      # Frontend origin(s) allowed by CORS (comma-separated).
+      - key: CORS_ORIGIN
+        value: https://www.natielectrolyte.com,https://natielectrolyte.com
+      # Public URL of the frontend — used in verification / reset email links.
+      - key: WEB_URL
+        value: https://www.natielectrolyte.com
+      # Public URL of THIS API (used for local-storage URLs; harmless with Cloudinary).
+      - key: PUBLIC_API_URL
+        value: https://api.natielectrolyte.com
+      # Cross-subdomain cookie sharing between www + api. Requires the api.
+      # custom domain below; keep sameSite=lax in code (same-site).
+      - key: COOKIE_DOMAIN
+        value: .natielectrolyte.com
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: THROTTLE_TTL
+        value: "60"
+      - key: THROTTLE_LIMIT
+        value: "100"
+      - key: EMAIL_FROM
+        value: NATI <onboarding@resend.dev>
+      # --- secrets: set these in the Render dashboard ---
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        sync: false
+      - key: JWT_ACCESS_TTL
+        value: 15m
+      - key: JWT_REFRESH_SECRET
+        sync: false
+      - key: JWT_REFRESH_TTL
+        value: 7d
+      - key: COOKIE_SECRET
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false

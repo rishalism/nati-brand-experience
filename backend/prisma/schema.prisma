@@ -1,0 +1,614 @@
+// NATI database schema.
+//
+// Conventions applied to EVERY model (kept portable so a later move from
+// Supabase to AWS RDS needs no redesign):
+//   - `id`   UUID primary key
+//   - `createdAt` / `updatedAt` timestamps
+//   - `deletedAt` nullable  -> soft delete (filtered at the repository layer)
+//   - explicit @@index / @@unique on lookup + FK columns
+//   - snake_case table names via @@map
+//
+// Phase 1 implements only the auth/RBAC foundation. Catalog, cart, orders,
+// payments, reviews, etc. are added in their respective phases against these
+// same conventions.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+}
+
+// Used by VerificationToken (email verification / password reset) in Phase 2.
+enum TokenType {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+}
+
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum InventoryMovementReason {
+  RESTOCK
+  SALE
+  ADJUSTMENT
+  RETURN
+  RESERVATION
+  RELEASE
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  PENDING
+  AUTHORIZED
+  CAPTURED
+  FAILED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  RAZORPAY
+  COD
+  STRIPE
+  PAYPAL
+}
+
+model User {
+  id              String     @id @default(uuid()) @db.Uuid
+  email           String     @unique
+  passwordHash    String     @map("password_hash")
+  firstName       String     @map("first_name")
+  lastName        String     @map("last_name")
+  status          UserStatus @default(PENDING)
+  emailVerified   Boolean    @default(false) @map("email_verified")
+  emailVerifiedAt DateTime?  @map("email_verified_at")
+  lastLoginAt     DateTime?  @map("last_login_at")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  roles              UserRole[]
+  refreshTokens      RefreshToken[]
+  auditLogs          AuditLog[]
+  addresses          Address[]
+  verificationTokens VerificationToken[]
+  cart               Cart?
+  wishlist           Wishlist?
+  couponUsages       CouponUsage[]
+  orders             Order[]
+  notifications      Notification[]
+
+  @@index([status])
+  @@index([deletedAt])
+  @@map("users")
+}
+
+model Role {
+  id          String  @id @default(uuid()) @db.Uuid
+  name        String  @unique // mirrors @nati/shared ROLES
+  description String?
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  users       UserRole[]
+  permissions RolePermission[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id          String  @id @default(uuid()) @db.Uuid
+  name        String  @unique // mirrors @nati/shared PERMISSIONS, e.g. "product:read"
+  description String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  roles RolePermission[]
+
+  @@map("permissions")
+}
+
+model UserRole {
+  userId     String   @map("user_id") @db.Uuid
+  roleId     String   @map("role_id") @db.Uuid
+  assignedAt DateTime @default(now()) @map("assigned_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+  @@index([roleId])
+  @@map("user_roles")
+}
+
+model RolePermission {
+  roleId       String @map("role_id") @db.Uuid
+  permissionId String @map("permission_id") @db.Uuid
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@index([permissionId])
+  @@map("role_permissions")
+}
+
+// Refresh tokens are stored hashed and rotated. `familyId` groups a rotation
+// chain so a reused (stolen) token can invalidate the whole family. Enables
+// multi-device sessions + secure logout. Consumed in Phase 2.
+model RefreshToken {
+  id                String    @id @default(uuid()) @db.Uuid
+  userId            String    @map("user_id") @db.Uuid
+  tokenHash         String    @unique @map("token_hash")
+  familyId          String    @map("family_id") @db.Uuid
+  userAgent         String?   @map("user_agent")
+  ipAddress         String?   @map("ip_address")
+  expiresAt         DateTime  @map("expires_at")
+  revokedAt         DateTime? @map("revoked_at")
+  replacedByTokenId String?   @map("replaced_by_token_id") @db.Uuid
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([familyId])
+  @@index([expiresAt])
+  @@map("refresh_tokens")
+}
+
+// Append-only audit trail. Written via an interceptor (Phase 6) but the table
+// exists from the start so security-relevant events can be recorded early.
+model AuditLog {
+  id         String  @id @default(uuid()) @db.Uuid
+  userId     String? @map("user_id") @db.Uuid
+  action     String
+  resource   String?
+  resourceId String? @map("resource_id")
+  metadata   Json?
+  ipAddress  String? @map("ip_address")
+  userAgent  String? @map("user_agent")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+// User address book. `isDefault` is enforced to at most one per user at the
+// service layer (Phase 2). Consumed by checkout in Phase 5.
+model Address {
+  id            String  @id @default(uuid()) @db.Uuid
+  userId        String  @map("user_id") @db.Uuid
+  label         String
+  recipientName String  @map("recipient_name")
+  line1         String
+  line2         String?
+  city          String
+  state         String
+  postalCode    String  @map("postal_code")
+  country       String
+  phone         String?
+  isDefault     Boolean @default(false) @map("is_default")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([deletedAt])
+  @@map("addresses")
+}
+
+// Single-use tokens for email verification and password reset. Stored hashed;
+// looked up by hash. `type` distinguishes the flow (see TokenType).
+model VerificationToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  tokenHash String    @unique @map("token_hash")
+  type      TokenType
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([type])
+  @@index([expiresAt])
+  @@map("verification_tokens")
+}
+
+// ---------------------------------------------------------------------------
+// Catalog (Phase 3)
+// ---------------------------------------------------------------------------
+
+model Brand {
+  id          String  @id @default(uuid()) @db.Uuid
+  name        String
+  slug        String  @unique
+  description String?
+  logoUrl     String? @map("logo_url")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  products Product[]
+
+  @@index([deletedAt])
+  @@map("brands")
+}
+
+model Category {
+  id          String  @id @default(uuid()) @db.Uuid
+  name        String
+  slug        String  @unique
+  description String?
+  imageUrl    String? @map("image_url")
+  parentId    String? @map("parent_id") @db.Uuid
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  parent   Category?  @relation("CategoryTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children Category[] @relation("CategoryTree")
+  products Product[]
+
+  @@index([parentId])
+  @@index([deletedAt])
+  @@map("categories")
+}
+
+model Product {
+  id             String        @id @default(uuid()) @db.Uuid
+  name           String
+  slug           String        @unique
+  description    String
+  price          Decimal       @db.Decimal(10, 2)
+  compareAtPrice Decimal?      @map("compare_at_price") @db.Decimal(10, 2)
+  currency       String        @default("USD")
+  sku            String?       @unique
+  status         ProductStatus @default(DRAFT)
+  isFeatured     Boolean       @default(false) @map("is_featured")
+  brandId        String?       @map("brand_id") @db.Uuid
+  categoryId     String?       @map("category_id") @db.Uuid
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  brand         Brand?         @relation(fields: [brandId], references: [id], onDelete: SetNull)
+  category      Category?      @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  images        ProductImage[]
+  inventory     Inventory?
+  cartItems     CartItem[]
+  wishlistItems WishlistItem[]
+  orderItems    OrderItem[]
+
+  @@index([status])
+  @@index([brandId])
+  @@index([categoryId])
+  @@index([isFeatured])
+  @@index([deletedAt])
+  @@map("products")
+}
+
+model ProductImage {
+  id        String  @id @default(uuid()) @db.Uuid
+  productId String  @map("product_id") @db.Uuid
+  url       String
+  storageKey String? @map("storage_key") // provider key for deletion
+  alt       String?
+  position  Int     @default(0)
+  isPrimary Boolean @default(false) @map("is_primary")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@map("product_images")
+}
+
+// Stock is NEVER stored on Product. One inventory record per product for now;
+// `warehouseId` (nullable) leaves room for multi-warehouse later without a
+// schema rewrite. Movements form an append-only ledger.
+model Inventory {
+  id                String  @id @default(uuid()) @db.Uuid
+  productId         String  @unique @map("product_id") @db.Uuid
+  warehouseId       String? @map("warehouse_id") @db.Uuid
+  quantity          Int     @default(0)
+  reserved          Int     @default(0)
+  lowStockThreshold Int     @default(0) @map("low_stock_threshold")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  product   Product             @relation(fields: [productId], references: [id], onDelete: Cascade)
+  movements InventoryMovement[]
+
+  @@map("inventory")
+}
+
+model InventoryMovement {
+  id          String                  @id @default(uuid()) @db.Uuid
+  inventoryId String                  @map("inventory_id") @db.Uuid
+  delta       Int
+  reason      InventoryMovementReason
+  note        String?
+  referenceId String?                 @map("reference_id")
+  createdBy   String?                 @map("created_by") @db.Uuid
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  inventory Inventory @relation(fields: [inventoryId], references: [id], onDelete: Cascade)
+
+  @@index([inventoryId])
+  @@index([createdAt])
+  @@map("inventory_movements")
+}
+
+// ---------------------------------------------------------------------------
+// Cart, Wishlist, Coupons (Phase 4)
+// ---------------------------------------------------------------------------
+
+// One active cart per user. Line prices are computed live from the product at
+// read time (not snapshotted) until checkout freezes them into an order.
+model Cart {
+  id       String  @id @default(uuid()) @db.Uuid
+  userId   String  @unique @map("user_id") @db.Uuid
+  couponId String? @map("coupon_id") @db.Uuid
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user   User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  coupon Coupon?    @relation(fields: [couponId], references: [id], onDelete: SetNull)
+  items  CartItem[]
+
+  @@map("carts")
+}
+
+model CartItem {
+  id        String @id @default(uuid()) @db.Uuid
+  cartId    String @map("cart_id") @db.Uuid
+  productId String @map("product_id") @db.Uuid
+  quantity  Int    @default(1)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  cart    Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([cartId, productId])
+  @@index([cartId])
+  @@map("cart_items")
+}
+
+model Wishlist {
+  id     String @id @default(uuid()) @db.Uuid
+  userId String @unique @map("user_id") @db.Uuid
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user  User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items WishlistItem[]
+
+  @@map("wishlists")
+}
+
+model WishlistItem {
+  id         String @id @default(uuid()) @db.Uuid
+  wishlistId String @map("wishlist_id") @db.Uuid
+  productId  String @map("product_id") @db.Uuid
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  wishlist Wishlist @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
+  product  Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([wishlistId, productId])
+  @@index([wishlistId])
+  @@map("wishlist_items")
+}
+
+model Coupon {
+  id            String       @id @default(uuid()) @db.Uuid
+  code          String       @unique
+  description   String?
+  discountType  DiscountType @map("discount_type")
+  discountValue Decimal      @map("discount_value") @db.Decimal(10, 2)
+  minSubtotal   Decimal?     @map("min_subtotal") @db.Decimal(10, 2)
+  maxDiscount   Decimal?     @map("max_discount") @db.Decimal(10, 2)
+  usageLimit    Int?         @map("usage_limit")
+  perUserLimit  Int?         @map("per_user_limit")
+  startsAt      DateTime?    @map("starts_at")
+  expiresAt     DateTime?    @map("expires_at")
+  isActive      Boolean      @default(true) @map("is_active")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  carts  Cart[]
+  usages CouponUsage[]
+  orders Order[]
+
+  @@index([isActive])
+  @@index([deletedAt])
+  @@map("coupons")
+}
+
+model CouponUsage {
+  id              String  @id @default(uuid()) @db.Uuid
+  couponId        String  @map("coupon_id") @db.Uuid
+  userId          String  @map("user_id") @db.Uuid
+  orderId         String? @map("order_id") @db.Uuid
+  discountApplied Decimal @map("discount_applied") @db.Decimal(10, 2)
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  coupon Coupon @relation(fields: [couponId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([couponId])
+  @@index([userId])
+  @@map("coupon_usages")
+}
+
+// ---------------------------------------------------------------------------
+// Orders, Payments, Invoices, Notifications (Phase 5)
+// ---------------------------------------------------------------------------
+
+// Orders snapshot pricing + the shipping address at placement time so later
+// changes to products/addresses/coupons never mutate historical orders.
+model Order {
+  id          String      @id @default(uuid()) @db.Uuid
+  orderNumber String      @unique @map("order_number")
+  userId      String      @map("user_id") @db.Uuid
+  status      OrderStatus @default(PENDING)
+  currency    String      @default("USD")
+
+  subtotal Decimal @db.Decimal(10, 2)
+  discount Decimal @default(0) @db.Decimal(10, 2)
+  shipping Decimal @default(0) @db.Decimal(10, 2)
+  total    Decimal @db.Decimal(10, 2)
+
+  couponId   String? @map("coupon_id") @db.Uuid
+  couponCode String? @map("coupon_code")
+
+  // Shipping address snapshot
+  recipientName String  @map("recipient_name")
+  line1         String
+  line2         String?
+  city          String
+  state         String
+  postalCode    String  @map("postal_code")
+  country       String
+  phone         String?
+
+  placedAt  DateTime  @default(now()) @map("placed_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  user    User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  coupon  Coupon?     @relation(fields: [couponId], references: [id], onDelete: SetNull)
+  items   OrderItem[]
+  payment Payment?
+  invoice Invoice?
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String  @id @default(uuid()) @db.Uuid
+  orderId   String  @map("order_id") @db.Uuid
+  productId String? @map("product_id") @db.Uuid
+  name      String
+  sku       String?
+  image     String?
+  unitPrice Decimal @map("unit_price") @db.Decimal(10, 2)
+  quantity  Int
+  lineTotal Decimal @map("line_total") @db.Decimal(10, 2)
+
+  order   Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+  @@map("order_items")
+}
+
+model Payment {
+  id                String        @id @default(uuid()) @db.Uuid
+  orderId           String        @unique @map("order_id") @db.Uuid
+  provider          PaymentMethod
+  status            PaymentStatus @default(PENDING)
+  amount            Decimal       @db.Decimal(10, 2)
+  currency          String        @default("USD")
+  providerOrderId   String?       @map("provider_order_id")
+  providerPaymentId String?       @map("provider_payment_id")
+  rawPayload        Json?         @map("raw_payload")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@map("payments")
+}
+
+model Invoice {
+  id            String @id @default(uuid()) @db.Uuid
+  orderId       String @unique @map("order_id") @db.Uuid
+  invoiceNumber String @unique @map("invoice_number")
+
+  issuedAt  DateTime @default(now()) @map("issued_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("invoices")
+}
+
+model Notification {
+  id       String  @id @default(uuid()) @db.Uuid
+  userId   String  @map("user_id") @db.Uuid
+  type     String
+  title    String
+  message  String
+  read     Boolean @default(false)
+  metadata Json?
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([read])
+  @@map("notifications")
+}
