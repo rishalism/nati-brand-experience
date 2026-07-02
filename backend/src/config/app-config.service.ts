@@ -38,6 +38,14 @@ export class AppConfigService {
       .filter(Boolean);
   }
 
+  get webUrl(): string {
+    return this.get('WEB_URL');
+  }
+
+  get email(): { resendApiKey?: string; from: string } {
+    return { resendApiKey: this.get('RESEND_API_KEY'), from: this.get('EMAIL_FROM') };
+  }
+
   get jwt(): {
     accessSecret: string;
     accessTtl: string;

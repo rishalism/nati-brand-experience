@@ -70,3 +70,13 @@ export async function unwrap<T>(promise: Promise<AxiosResponse<ApiResponse<T>>>)
   const { data } = await promise;
   return data.data as T;
 }
+
+/** Extracts a human-readable message from an API/Axios error for toasts. */
+export function getErrorMessage(error: unknown, fallback = "Something went wrong"): string {
+  if (axios.isAxiosError(error)) {
+    const data = error.response?.data as ApiResponse<unknown> | undefined;
+    if (data?.errors?.length) return data.errors[0].message;
+    if (data?.message) return data.message;
+  }
+  return fallback;
+}

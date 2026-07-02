@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ProductCard from '@/components/shop/ProductCard';
@@ -15,17 +14,10 @@ export interface CartItem {
 }
 
 const Shop = () => {
-  const navigate = useNavigate();
+  // Access is enforced by ProtectedRoute; cart/products stay local until
+  // Phases 3-4 wire them to the API.
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
-
-  // Check authentication
-  useEffect(() => {
-    const isAuth = sessionStorage.getItem('nati-auth');
-    if (!isAuth) {
-      navigate('/login');
-    }
-  }, [navigate]);
 
   const addToCart = (item: Omit<CartItem, 'quantity'>) => {
     setCart((prev) => {

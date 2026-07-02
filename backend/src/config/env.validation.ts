@@ -13,6 +13,8 @@ export const envSchema = z.object({
   API_PREFIX: z.string().default('api'),
   API_VERSION: z.string().default('1'),
   CORS_ORIGIN: z.string().default('http://localhost:8080'),
+  // Public URL of the frontend — used to build email verification / reset links.
+  WEB_URL: z.string().url().default('http://localhost:8080'),
 
   DATABASE_URL: z.string().url(),
 

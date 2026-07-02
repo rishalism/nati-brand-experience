@@ -1,84 +1,86 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import NatiLogo from '@/components/NatiLogo';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { toast } from '@/hooks/use-toast';
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { loginSchema, type LoginInput } from "@nati/shared";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "@/hooks/use-toast";
+import { authApi } from "@/features/auth/auth.api";
+import { getErrorMessage } from "@/services/api-client";
+import AuthShell from "@/features/auth/AuthShell";
 
 const Login = () => {
-  const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = (location.state as { from?: string } | null)?.from ?? "/shop";
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginInput>({ resolver: zodResolver(loginSchema) });
 
-    // Check password
-    setTimeout(() => {
-      if (password === 'kunjappu') {
-        // Store auth in sessionStorage
-        sessionStorage.setItem('nati-auth', 'true');
-        navigate('/shop');
-      } else {
-        toast({
-          title: 'Invalid Password',
-          description: 'Please enter the correct password to access the shop.',
-          variant: 'destructive',
-        });
-      }
-      setIsLoading(false);
-    }, 500);
+  const onSubmit = async (values: LoginInput) => {
+    try {
+      await authApi.login(values);
+      navigate(from, { replace: true });
+    } catch (error) {
+      toast({
+        title: "Login failed",
+        description: getErrorMessage(error, "Invalid email or password"),
+        variant: "destructive",
+      });
+    }
   };
 
   return (
-    <main className="min-h-screen bg-background flex flex-col items-center justify-center px-6">
-      {/* Logo */}
-      <div className="mb-16 animate-fade-in">
-        <NatiLogo className="h-28 md:h-36" />
-      </div>
+    <AuthShell
+      title="WELCOME BACK"
+      subtitle="Sign in to access the drop."
+      footer={
+        <>
+          No account?{" "}
+          <Link to="/register" className="text-primary hover:underline">
+            Create one
+          </Link>
+        </>
+      }
+    >
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <Input id="email" type="email" autoComplete="email" {...register("email")} />
+          {errors.email && <p className="text-destructive text-xs">{errors.email.message}</p>}
+        </div>
 
-      {/* Login Form */}
-      <form 
-        onSubmit={handleSubmit} 
-        className="w-full max-w-md space-y-6 animate-fade-in"
-        style={{ animationDelay: '200ms' }}
-      >
-        <div className="flex gap-0">
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="password">Password</Label>
+            <Link to="/forgot-password" className="text-xs text-muted-foreground hover:text-primary">
+              Forgot?
+            </Link>
+          </div>
           <Input
+            id="password"
             type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="flex-1 h-14 bg-transparent border-0 border-b border-foreground/30 rounded-none text-foreground placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:border-primary font-body text-base tracking-wider"
+            autoComplete="current-password"
+            {...register("password")}
           />
-          <Button
-            type="submit"
-            disabled={isLoading}
-            className="h-14 px-8 bg-primary text-primary-foreground font-heading text-lg tracking-wider rounded-none hover:bg-primary/90 transition-all"
-          >
-            {isLoading ? '...' : 'ENTER'}
-          </Button>
+          {errors.password && (
+            <p className="text-destructive text-xs">{errors.password.message}</p>
+          )}
         </div>
 
         <Button
-          type="button"
-          variant="outline"
-          className="w-full h-14 bg-primary text-primary-foreground font-heading text-sm tracking-widest rounded-none border-0 hover:bg-primary/90 relative overflow-hidden"
-          onClick={() => toast({
-            title: 'Waitlist',
-            description: 'Waitlist feature coming soon!',
-          })}
+          type="submit"
+          disabled={isSubmitting}
+          className="w-full h-12 font-heading tracking-wider rounded-none"
         >
-          <span className="absolute left-0 top-0 bottom-0 w-2 bg-primary" />
-          JOIN WAITLIST FOR PASSWORD
+          {isSubmitting ? "SIGNING IN..." : "SIGN IN"}
         </Button>
-
-        <p className="text-center text-muted-foreground text-xs tracking-wider italic">
-          **DROPS ARE ONLY ACCESSIBLE WITH PASSWORD**
-        </p>
       </form>
-    </main>
+    </AuthShell>
   );
 };
 

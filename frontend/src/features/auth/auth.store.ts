@@ -14,6 +14,7 @@ interface AuthState {
   user: PublicUser | null;
   status: AuthStatus;
   setUser: (user: PublicUser | null) => void;
+  setStatus: (status: AuthStatus) => void;
   clear: () => void;
   hasRole: (roles: Role[]) => boolean;
 }
@@ -23,6 +24,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   status: "idle",
   setUser: (user) =>
     set({ user, status: user ? "authenticated" : "unauthenticated" }),
+  setStatus: (status) => set({ status }),
   clear: () => set({ user: null, status: "unauthenticated" }),
   hasRole: (roles) => {
     const user = get().user;
