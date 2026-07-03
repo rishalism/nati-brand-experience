@@ -79,16 +79,20 @@ Render Dashboard → **New → Web Service** → connect the repo, then set:
 **Build Command:**
 
 ```bash
-corepack enable && pnpm install --frozen-lockfile && pnpm --filter @nati/shared build && pnpm --filter @nati/backend exec prisma migrate deploy && pnpm --filter @nati/backend build
+pnpm install --frozen-lockfile && pnpm --filter @nati/shared build && pnpm --filter @nati/backend exec prisma migrate deploy && pnpm --filter @nati/backend build
 ```
 
 What it does, in order:
-1. `corepack enable` → makes the repo-pinned pnpm (`packageManager` field) available.
-2. `pnpm install --frozen-lockfile` → installs the whole workspace.
-3. Build `@nati/shared` (backend imports it).
-4. `prisma migrate deploy` → applies any pending migrations to Supabase
+1. `pnpm install --frozen-lockfile` → installs the whole workspace.
+2. Build `@nati/shared` (backend imports it).
+3. `prisma migrate deploy` → applies any pending migrations to Supabase
    (idempotent; already-applied migrations are skipped).
-5. Build the backend (`prisma generate` + `nest build`).
+4. Build the backend (`prisma generate` + `nest build`).
+
+> **Don't prepend `corepack enable`.** Render already provisions the pnpm pinned
+> in the root `packageManager` field. `corepack enable` tries to relink
+> `/usr/bin/pnpm` on Render's read-only FS and fails with
+> `EROFS: read-only file system, unlink '/usr/bin/pnpm'`.
 
 **Start Command:** `pnpm --filter @nati/backend start` runs `node dist/main.js`
 with the backend as the working directory. The app binds to `0.0.0.0:$PORT`

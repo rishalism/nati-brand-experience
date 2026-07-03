@@ -19,7 +19,6 @@ services:
     autoDeploy: true
     healthCheckPath: /api/v1/health
     buildCommand: >-
-      corepack enable &&
       pnpm install --frozen-lockfile &&
       pnpm --filter @nati/shared build &&
       pnpm --filter @nati/backend exec prisma migrate deploy &&
