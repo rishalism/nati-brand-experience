@@ -27,6 +27,7 @@ import { CouponsModule } from './modules/coupons/coupons.module';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { OrdersModule } from './modules/orders/orders.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
 
 @Module({
   imports: [
@@ -75,6 +76,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
     PaymentsModule,
     OrdersModule,
     NotificationsModule,
+    AnalyticsModule,
   ],
   providers: [
     // Global guards run in this order:

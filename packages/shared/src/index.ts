@@ -9,6 +9,7 @@ export * from "./types/address";
 export * from "./types/catalog";
 export * from "./types/commerce";
 export * from "./types/order";
+export * from "./types/analytics";
 
 // Constants / enums
 export * from "./constants/roles";
