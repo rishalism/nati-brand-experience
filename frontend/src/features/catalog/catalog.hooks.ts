@@ -89,6 +89,42 @@ export const useAdjustInventory = () => {
   });
 };
 
+function useInvalidateProductImages() {
+  const qc = useQueryClient();
+  return (productId: string) => {
+    void qc.invalidateQueries({ queryKey: ["admin-products"] });
+    void qc.invalidateQueries({ queryKey: ["products"] });
+    void qc.invalidateQueries({ queryKey: catalogKeys.product(productId) });
+  };
+}
+
+export const useUploadProductImage = () => {
+  const invalidate = useInvalidateProductImages();
+  return useMutation({
+    mutationFn: ({ productId, file }: { productId: string; file: File }) =>
+      catalogApi.uploadProductImage(productId, file),
+    onSuccess: (_data, { productId }) => invalidate(productId),
+  });
+};
+
+export const useSetPrimaryImage = () => {
+  const invalidate = useInvalidateProductImages();
+  return useMutation({
+    mutationFn: ({ productId, imageId }: { productId: string; imageId: string }) =>
+      catalogApi.setPrimaryImage(productId, imageId),
+    onSuccess: (_data, { productId }) => invalidate(productId),
+  });
+};
+
+export const useDeleteProductImage = () => {
+  const invalidate = useInvalidateProductImages();
+  return useMutation({
+    mutationFn: ({ productId, imageId }: { productId: string; imageId: string }) =>
+      catalogApi.deleteProductImage(productId, imageId),
+    onSuccess: (_data, { productId }) => invalidate(productId),
+  });
+};
+
 export const useCreateBrand = () => {
   const qc = useQueryClient();
   return useMutation({

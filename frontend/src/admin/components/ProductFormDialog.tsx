@@ -22,6 +22,7 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { getErrorMessage } from "@/services/api-client";
 import { useBrands, useCategories, useCreateProduct, useUpdateProduct } from "@/features/catalog/catalog.hooks";
+import ProductImageManager from "@/admin/components/ProductImageManager";
 
 const NONE = "__none__";
 const STATUSES: ProductStatus[] = ["DRAFT", "ACTIVE", "ARCHIVED"];
@@ -212,6 +213,16 @@ const ProductFormDialog = ({ open, onOpenChange, product }: Props) => {
             <Checkbox id="p-featured" checked={form.isFeatured} onCheckedChange={(v) => set("isFeatured", v === true)} />
             <Label htmlFor="p-featured">Featured</Label>
           </div>
+
+          {isEdit && product ? (
+            <div className="border-t border-border pt-4">
+              <ProductImageManager productId={product.id} initialImages={product.images} />
+            </div>
+          ) : (
+            <p className="border-t border-border pt-4 text-sm text-muted-foreground">
+              Save the product first, then reopen it to add images.
+            </p>
+          )}
         </div>
 
         <DialogFooter>

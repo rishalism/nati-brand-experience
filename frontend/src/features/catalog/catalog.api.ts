@@ -54,6 +54,23 @@ export const catalogApi = {
   deleteProduct(id: string): Promise<void> {
     return apiClient.delete(`/products/${id}`).then(() => undefined);
   },
+  // Images: multipart upload. Passing a FormData body makes axios v1 unset the
+  // instance's default JSON content-type so the browser sets multipart + boundary.
+  uploadProductImage(productId: string, file: File): Promise<Product> {
+    const form = new FormData();
+    form.append("file", file);
+    return unwrap<Product>(
+      apiClient.post<ApiResponse<Product>>(`/products/${productId}/images`, form),
+    );
+  },
+  setPrimaryImage(productId: string, imageId: string): Promise<Product> {
+    return unwrap<Product>(
+      apiClient.patch<ApiResponse<Product>>(`/products/${productId}/images/${imageId}/primary`, {}),
+    );
+  },
+  deleteProductImage(productId: string, imageId: string): Promise<void> {
+    return apiClient.delete(`/products/${productId}/images/${imageId}`).then(() => undefined);
+  },
   adjustInventory(productId: string, input: AdjustInventoryInput): Promise<InventoryInfo> {
     return unwrap<InventoryInfo>(
       apiClient.post<ApiResponse<InventoryInfo>>(`/inventory/${productId}/adjust`, input),
