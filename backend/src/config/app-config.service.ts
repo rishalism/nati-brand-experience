@@ -76,10 +76,16 @@ export class AppConfigService {
     };
   }
 
-  get cookie(): { secret: string; secure: boolean; domain: string } {
+  get cookie(): {
+    secret: string;
+    secure: boolean;
+    sameSite: 'lax' | 'strict' | 'none';
+    domain?: string;
+  } {
     return {
       secret: this.get('COOKIE_SECRET'),
       secure: this.get('COOKIE_SECURE'),
+      sameSite: this.get('COOKIE_SAMESITE'),
       domain: this.get('COOKIE_DOMAIN'),
     };
   }

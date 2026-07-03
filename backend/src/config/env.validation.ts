@@ -30,7 +30,18 @@ export const envSchema = z.object({
     .enum(['true', 'false'])
     .default('false')
     .transform((v) => v === 'true'),
-  COOKIE_DOMAIN: z.string().default('localhost'),
+  // 'none' is required when the frontend and API live on different sites
+  // (e.g. vercel.app/localhost → onrender.com); browsers then also require
+  // Secure, which cookies.ts enforces.
+  COOKIE_SAMESITE: z.enum(['lax', 'strict', 'none']).default('lax'),
+  // Optional. When unset the cookie is host-only (scoped to the API host),
+  // which is correct unless sharing cookies across subdomains of one site.
+  // A Domain that doesn't match the API host gets the cookie silently
+  // rejected by the browser.
+  COOKIE_DOMAIN: z
+    .string()
+    .optional()
+    .transform((v) => (v?.trim() ? v.trim() : undefined)),
 
   THROTTLE_TTL: z.coerce.number().int().positive().default(60),
   THROTTLE_LIMIT: z.coerce.number().int().positive().default(100),

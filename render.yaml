@@ -32,19 +32,26 @@ services:
         value: api
       - key: API_VERSION
         value: "1"
-      # Frontend origin(s) allowed by CORS (comma-separated).
+      # Frontend origin(s) allowed by CORS (comma-separated). Include local dev
+      # so a localhost frontend can use this API with credentialed requests.
       - key: CORS_ORIGIN
-        value: https://www.natielectrolyte.com,https://natielectrolyte.com
+        value: https://www.natielectrolyte.com,https://natielectrolyte.com,http://localhost:8080
       # Public URL of the frontend — used in verification / reset email links.
       - key: WEB_URL
         value: https://www.natielectrolyte.com
       # Public URL of THIS API (used for local-storage URLs; harmless with Cloudinary).
       - key: PUBLIC_API_URL
-        value: https://api.natielectrolyte.com
-      # Cross-subdomain cookie sharing between www + api. Requires the api.
-      # custom domain below; keep sameSite=lax in code (same-site).
-      - key: COOKIE_DOMAIN
-        value: .natielectrolyte.com
+        value: https://nati-backend-pc2z.onrender.com
+      # The frontend (vercel/localhost) and this API (onrender.com) are
+      # DIFFERENT sites, so auth cookies must be SameSite=None + Secure, and
+      # host-only (no COOKIE_DOMAIN — an explicit Domain that doesn't match
+      # the API host makes browsers silently reject the cookie, which breaks
+      # auth: login returns 200 but every following request is 401).
+      # If you later move the API to api.natielectrolyte.com with the frontend
+      # on www.natielectrolyte.com, switch to COOKIE_SAMESITE=lax and
+      # COOKIE_DOMAIN=.natielectrolyte.com.
+      - key: COOKIE_SAMESITE
+        value: none
       - key: COOKIE_SECURE
         value: "true"
       - key: THROTTLE_TTL

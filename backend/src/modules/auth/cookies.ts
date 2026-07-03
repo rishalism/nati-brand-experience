@@ -12,11 +12,15 @@ function refreshCookiePath(config: AppConfigService): string {
 }
 
 function baseOptions(config: AppConfigService): CookieOptions {
+  const { secure, sameSite, domain } = config.cookie;
   return {
     httpOnly: true,
-    secure: config.cookie.secure,
-    sameSite: 'lax',
-    domain: config.cookie.domain,
+    // Browsers reject SameSite=None cookies that aren't Secure.
+    secure: sameSite === 'none' ? true : secure,
+    sameSite,
+    // Omit Domain entirely when unset → host-only cookie. An explicit Domain
+    // that doesn't match the API host is silently dropped by the browser.
+    ...(domain ? { domain } : {}),
   };
 }
 
