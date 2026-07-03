@@ -19,6 +19,7 @@ const Wishlist = lazy(() => import("@/customer/pages/Wishlist"));
 const Checkout = lazy(() => import("@/customer/pages/Checkout"));
 const Orders = lazy(() => import("@/customer/pages/Orders"));
 const OrderDetail = lazy(() => import("@/customer/pages/OrderDetail"));
+const Profile = lazy(() => import("@/customer/pages/Profile"));
 const NotFound = lazy(() => import("@/customer/pages/NotFound"));
 const AdminDashboard = lazy(() => import("@/admin/pages/Dashboard"));
 const AdminProducts = lazy(() => import("@/admin/pages/AdminProducts"));
@@ -48,16 +49,18 @@ export const router = createBrowserRouter([
       { path: "/verify-email", element: withSuspense(<VerifyEmail />) },
       { path: "/forgot-password", element: withSuspense(<ForgotPassword />) },
       { path: "/reset-password", element: withSuspense(<ResetPassword />) },
-      // The drop is gated behind a real account (replaces the old password gate).
+      // Catalog is browsable by guests; login is only required to act
+      // (cart, wishlist, checkout, orders, profile).
+      { path: "/shop", element: withSuspense(<Shop />) },
+      { path: "/product/:productId", element: withSuspense(<ProductDetail />) },
       {
         element: <ProtectedRoute />,
         children: [
-          { path: "/shop", element: withSuspense(<Shop />) },
-          { path: "/product/:productId", element: withSuspense(<ProductDetail />) },
           { path: "/wishlist", element: withSuspense(<Wishlist />) },
           { path: "/checkout", element: withSuspense(<Checkout />) },
           { path: "/orders", element: withSuspense(<Orders />) },
           { path: "/orders/:orderId", element: withSuspense(<OrderDetail />) },
+          { path: "/profile", element: withSuspense(<Profile />) },
         ],
       },
     ],

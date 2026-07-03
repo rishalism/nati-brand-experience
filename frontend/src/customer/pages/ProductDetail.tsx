@@ -15,6 +15,7 @@ import productBoxes from '@/assets/product-boxes.jpg';
 import { useProduct } from '@/features/catalog/catalog.hooks';
 import { useAddToCart, useCart, useCartUi } from '@/features/cart/cart.hooks';
 import { useToggleWishlist, useWishlistIds } from '@/features/wishlist/wishlist.hooks';
+import { useRequireAuth } from '@/features/auth/use-require-auth';
 
 // Fallback gallery when a product has no uploaded images yet.
 const FALLBACK_IMAGES = [productSachetsHero, productSachetsDetail, productBoxes];
@@ -46,6 +47,7 @@ const ProductDetail = () => {
   const addToCart = useAddToCart();
   const toggleWishlist = useToggleWishlist();
   const wishlistIds = useWishlistIds();
+  const requireAuth = useRequireAuth();
 
   const averageRating = reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length;
 
@@ -82,19 +84,20 @@ const ProductDetail = () => {
   const inStock = product.inventory.inStock;
   const isWishlisted = wishlistIds.has(product.id);
 
-  const handleAddToCart = () => {
-    addToCart.mutate(
-      { productId: product.id, quantity },
-      {
-        onSuccess: () => {
-          toast({ title: 'Added to cart', description: `${quantity}x ${product.name}` });
-          cartUi.open();
+  const handleAddToCart = () =>
+    requireAuth(() => {
+      addToCart.mutate(
+        { productId: product.id, quantity },
+        {
+          onSuccess: () => {
+            toast({ title: 'Added to cart', description: `${quantity}x ${product.name}` });
+            cartUi.open();
+          },
+          onError: (error) =>
+            toast({ title: 'Could not add', description: getErrorMessage(error), variant: 'destructive' }),
         },
-        onError: (error) =>
-          toast({ title: 'Could not add', description: getErrorMessage(error), variant: 'destructive' }),
-      },
-    );
-  };
+      );
+    });
 
   return (
     <div className="min-h-screen bg-background">
@@ -219,7 +222,7 @@ const ProductDetail = () => {
                   {inStock ? 'ADD TO CART' : 'SOLD OUT'}
                 </Button>
                 <Button
-                  onClick={() => toggleWishlist.mutate(product.id)}
+                  onClick={() => requireAuth(() => toggleWishlist.mutate(product.id))}
                   variant="outline"
                   size="lg"
                   className="min-h-[48px]"

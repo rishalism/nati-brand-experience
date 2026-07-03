@@ -69,6 +69,18 @@ async function changePassword(currentPassword: string, newPassword: string): Pro
   await apiClient.post("/auth/change-password", { currentPassword, newPassword });
 }
 
+/** Updates the profile (name) and keeps the store's user in sync. */
+async function updateProfile(input: {
+  firstName?: string;
+  lastName?: string;
+}): Promise<PublicUser> {
+  const user = await unwrap<PublicUser>(
+    apiClient.patch<ApiResponse<PublicUser>>("/users/me", input),
+  );
+  useAuthStore.getState().setUser(user);
+  return user;
+}
+
 export const authApi = {
   login,
   register,
@@ -78,4 +90,5 @@ export const authApi = {
   forgotPassword,
   resetPassword,
   changePassword,
+  updateProfile,
 };

@@ -22,6 +22,7 @@ import { useProducts, useCategories } from '@/features/catalog/catalog.hooks';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useAddToCart, useCart, useCartUi } from '@/features/cart/cart.hooks';
 import { useToggleWishlist, useWishlistIds } from '@/features/wishlist/wishlist.hooks';
+import { useRequireAuth } from '@/features/auth/use-require-auth';
 
 const SORT_OPTIONS: Record<string, { sortBy: string; sortOrder: SortOrder; label: string }> = {
   newest: { sortBy: 'createdAt', sortOrder: 'desc', label: 'Newest' },
@@ -59,22 +60,27 @@ const Shop = () => {
   const addToCart = useAddToCart();
   const toggleWishlist = useToggleWishlist();
   const wishlistIds = useWishlistIds();
+  const requireAuth = useRequireAuth();
 
   const resetToFirstPage = () => setPage(1);
 
-  const handleAddToCart = (productId: string) => {
-    addToCart.mutate(
-      { productId },
-      {
-        onSuccess: () => {
-          toast({ title: 'Added to cart' });
-          cartUi.open();
+  const handleAddToCart = (productId: string) =>
+    requireAuth(() => {
+      addToCart.mutate(
+        { productId },
+        {
+          onSuccess: () => {
+            toast({ title: 'Added to cart' });
+            cartUi.open();
+          },
+          onError: (error) =>
+            toast({ title: 'Could not add', description: getErrorMessage(error), variant: 'destructive' }),
         },
-        onError: (error) =>
-          toast({ title: 'Could not add', description: getErrorMessage(error), variant: 'destructive' }),
-      },
-    );
-  };
+      );
+    });
+
+  const handleToggleWishlist = (productId: string) =>
+    requireAuth(() => toggleWishlist.mutate(productId));
 
   const products = data?.items ?? [];
   const pagination = data?.pagination;
@@ -177,7 +183,7 @@ const Shop = () => {
                   outOfStock={!product.inventory.inStock}
                   isWishlisted={wishlistIds.has(product.id)}
                   onAddToCart={handleAddToCart}
-                  onToggleWishlist={(pid) => toggleWishlist.mutate(pid)}
+                  onToggleWishlist={handleToggleWishlist}
                 />
               ))}
           </div>
