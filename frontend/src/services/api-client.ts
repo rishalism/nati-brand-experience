@@ -42,6 +42,17 @@ interface RetriableConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
 }
 
+// The instance sets a default JSON content-type. For FormData bodies that makes
+// axios serialize the form to JSON (files become {}), so multipart uploads
+// arrive empty. Drop the header for FormData and let the browser set
+// multipart/form-data with the correct boundary.
+apiClient.interceptors.request.use((config) => {
+  if (typeof FormData !== "undefined" && config.data instanceof FormData) {
+    config.headers.delete("Content-Type");
+  }
+  return config;
+});
+
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError<ApiResponse<unknown>>) => {
